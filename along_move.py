@@ -9,9 +9,9 @@ class App(QtWidgets.QMainWindow):
         self.initUI()
 
         # 初始化路径不可见
-        self.path_visible = False
+        # self.path_visible = False
         # 初始化路径线
-        self.path_line, = self.ax.plot([], [], [], 'b-', visible=self.path_visible)
+        # self.path_line, = self.ax.plot([], [], [], 'b-', visible=self.path_visible)
 
     def initUI(self):
         self.fig = Figure()
@@ -36,10 +36,13 @@ class App(QtWidgets.QMainWindow):
             btn.clicked.connect(lambda _, d=direction: self.on_direction_clicked(d))
             hbox.addWidget(btn)
 
+        """
         # 创建显示/隐藏路径的按钮
         self.toggle_path_btn = QtWidgets.QPushButton('Toggle Path')
         self.toggle_path_btn.clicked.connect(self.toggle_path)
         hbox.addWidget(self.toggle_path_btn)
+        """
+
 
         # 创建一个QWidget对象，将布局添加到其中
         widget = QtWidgets.QWidget()
@@ -56,29 +59,32 @@ class App(QtWidgets.QMainWindow):
 
     def get_movement_from_direction(self, direction):
         if direction == 'X+':
-            return 1, 0, 0
+            return 0.1,0,0
         elif direction == 'X-':
-            return -1, 0, 0
+            return -0.1, 0, 0
         elif direction == 'Y+':
-            return 0, 1, 0
+            return 0, 0.1, 0
         elif direction == 'Y-':
-            return 0, -1, 0
+            return 0, -0.1, 0
         elif direction == 'Z+':
-            return 0, 0, 1
+            return 0, 0, 0.1
         elif direction == 'Z-':
-            return 0, 0, -1
+            return 0, 0, -0.1
 
     def update_position(self, dx, dy, dz):
         # 更新点的位置
-        x, y, _ = self.line.get_data()
-        new_x, new_y = x[0] + dx, y[0] + dy
+        print(self.line.get_data)
+        x, y = self.line.get_data()
+        new_x, new_y, new_z = x[0] + dx, y[0] + dy, dz
         self.line.set_data([new_x], [new_y])
-        self.line.set_3d_properties([0])  # 保持Z坐标不变
+        self.line.set_3d_properties([new_z])  # 保持Z坐标不变
         self.canvas.draw()
 
         # 更新路径
-        if self.path_visible:
-            self.update_path(new_x, new_y, 0)
+        # if self.path_visible:
+        #   self.update_path(new_x, new_y, 0)
+
+    """
 
     def update_path(self, x, y, z):
         if not self.path_visible:
@@ -95,6 +101,8 @@ class App(QtWidgets.QMainWindow):
         self.path_visible = not self.path_visible
         self.path_line.set_visible(self.path_visible)
         self.canvas.draw()
+        
+    """
 
 app = QtWidgets.QApplication(sys.argv)
 ex = App()
