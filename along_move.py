@@ -69,15 +69,14 @@ class App(QtWidgets.QMainWindow):
         elif direction == 'Z+':
             return 0, 0, 0.1
         elif direction == 'Z-':
-            return 0, 0, -0.1
+            return 0, 0, -0.5
 
     def update_position(self, dx, dy, dz):
         # 更新点的位置
-        print(self.line.get_data)
-        x, y = self.line.get_data()
-        new_x, new_y, new_z = x[0] + dx, y[0] + dy, dz
+        x, y, z = self.line.get_data_3d()
+        new_x, new_y, new_z = x[0] + dx, y[0] + dy, z[0] + dz
         self.line.set_data([new_x], [new_y])
-        self.line.set_3d_properties([new_z])  # 保持Z坐标不变
+        self.line.set_3d_properties([new_z])
         self.canvas.draw()
 
         # 更新路径
