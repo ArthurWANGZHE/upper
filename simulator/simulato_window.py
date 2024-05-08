@@ -1,4 +1,4 @@
-# simulator_window.py
+# 主窗口界面和布局
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp
 from simulator.gl_widget import GLWidget
 
