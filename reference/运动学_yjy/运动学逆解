@@ -1,0 +1,65 @@
+% xyz = [x1, y1, z1; x2, y2, z2; ...; xN, yN, zN];
+
+% 这里我们手动创建一个示例矩阵
+xyz = [ % 第一组x, y, z
+      0,0,0;
+      50,80,-330;
+      60,80,-340;
+      60,80,-330;
+
+      % ... 可以继续添加更多组
+      ];
+
+% 初始化结果数组，大小与xyz相同，但每个元素都是一个3元素的数组，用于存储t1, t2, t3
+sz = size(xyz);
+[m, n] = size(xyz);
+
+% 创建一个与给定数组具有相同大小和形状的全零数组
+
+t_results = zeros(sz); % 使用cell数组来存储不同大小的数组
+
+v_results =  zeros(m-1, n);
+a_results =  zeros(m-2, n);
+% 静平台半径、动平台半径、杆长等参数
+R1 = 180;
+R2 = 50;
+R = R1 - R2;
+l = 270;
+
+% 循环遍历xyz数组中的每一行
+for i = 1:size(xyz, 1)
+
+    x = xyz(i, 1);
+    y = xyz(i, 2);
+    z = xyz(i, 3);
+
+    % 建立方程组并计算t1, t2, t3
+    t3 = -z - sqrt(l^2 - x^2 - (y + R)^2);
+    t2 = -z - sqrt(l^2 - (x - sqrt(3)/2 * R)^2 - (R/2 - y)^2);
+    t1 = -z - sqrt(l^2 - (sqrt(3)/2 * R + x)^2 - (R/2 - y)^2);
+
+
+    ttt=[t1,t2,t3];
+% 遍历源数组的每一行
+    % 将源数组当前行的数据复制到目标数组对应的行
+    t_results(i, :) = ttt;
+    if(i>1)
+        vx = (t_results(i, 1)-t_results(i-1, 1))/0.01;
+        vy = (t_results(i, 2)-t_results(i-1, 2))/0.01;
+        vz = (t_results(i, 3)-t_results(i-1, 3))/0.01;
+        vvv = [vx,vy,vz];
+        v_results(i-1,:) = vvv;
+
+
+    end
+
+    if(i>2)
+        zx = (v_results(i-1, 1)-v_results(i-2, 1))/0.01;
+        zy = (v_results(i-1, 2)-v_results(i-2, 2))/0.01;
+        zz = (v_results(i-2, 3)-v_results(i-2, 3))/0.01;
+        zzz = [zx,zy,zz];
+        z_results(i-2,:) = zzz;
+
+    end
+
+end
