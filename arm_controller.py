@@ -1,6 +1,6 @@
 # 实现点动、寸动以及急停
 from Delta_robot import DeltaRobotKinematics
-from utils import ws
+# from utils import ws
 class ArmController:
     def __init__(self):
         self.robot= DeltaRobotKinematics(390,
@@ -8,12 +8,13 @@ class ArmController:
                          241,
                          300)
         # self.communication = communication
-
+    """
     def cal_ws(self):
         if self.robot.xyz in ws:
             pass
         else:
             return Exception
+    """
 
     # 沿着x轴移动
     def move_arm_x(self, distance):

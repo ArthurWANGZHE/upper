@@ -10,7 +10,7 @@ class DeltaRobotKinematics:
         self.base_radius = static_dia / 2  # 静平台半径
         self.top_radius = moving_dia / 2  # 动平台半径
         self.theta = math.radians(120)  # 角度转换为弧度
-        self.xyz=[0.0, -1.4210854715202004e-14, -440.7124727947029]
+        self.xyz=[0.0, -1.4210854715202004e-14, -140.71247279470288]
         self.t=[300,300,300]
 
 
@@ -102,8 +102,9 @@ class DeltaRobotKinematics:
         z = OA[2]
 
         return x, y, z
+    """
     def calculate_workspace(self,  step=1):
-        """计算工作空间"""
+        # 计算工作空间
         t1_range, t2_range, t3_range=self.travel_range,self.travel_range,self.travel_range
         workspace = []
         for t1 in np.arange(t1_range[0], t1_range[1], step):
@@ -116,6 +117,7 @@ class DeltaRobotKinematics:
                         # 如果计算过程中出现错误，跳过这个点
                         continue
         return np.array(workspace)
+    """
     def forward_kinematics(self, x, y, z):
         """正运动学：根据动平台中心坐标计算滑块距离"""
         R = self.base_radius - self.top_radius

@@ -1,0 +1,283 @@
+clc; clear; close all;
+
+% 输入两个坐标值（单位：mm）
+P1 = [-50; -50; -300];
+P2 = [0; -50; -380];
+%输入参数
+R1 = 125;
+R2 = 60;
+R = R1 - R2;
+l = 280;
+mydt = 0.1;%插补步长
+
+
+% 计算直线插补的距离（单位：mm）
+q0 = 0;
+q1 = norm(P1 - P2);  % 位移（单位：mm）
+vmax = 20;            % 最大速度（单位：mm/s）
+amax = 15;            % 最大加速度（单位：mm/s²）
+v0 = 0;              % 初始速度（单位：mm/s）
+v1 = 0;              % 终止速度（单位：mm/s）
+jmax = 20;            % 最大加加速度（单位：mm/s³）
+count = 0;
+
+% 计算Ta、Td、Tj1、Tj2、Tv、alima、alimd等参数
+if (vmax - v0) * jmax < amax^2
+    if v0 > vmax
+        Tj1 = 0;
+        Ta = 0;
+        alima = 0;
+    else
+        Tj1 = sqrt((vmax - v0) / jmax);
+        Ta = 2 * Tj1;
+        alima = Tj1 * jmax;
+    end
+else
+    Tj1 = amax / jmax;
+    Ta = Tj1 + (vmax - v0) / amax;
+    alima = amax;
+end
+
+if (vmax - v1) * jmax < amax^2
+    Tj2 = sqrt((vmax - v1) / jmax);
+    Td = 2 * Tj2;
+    alimd = Tj2 * jmax;
+else
+    Tj2 = amax / jmax;
+    Td = Tj2 + (vmax - v1) / amax;
+    alimd = amax;
+end
+
+Tv = (q1 - q0) / vmax - Ta / 2 * (1 + v0 / vmax) - Td / 2 * (1 + v1 / vmax);
+
+% 动态调整参数，确保轨迹满足条件
+if Tv <= 0
+    Tv = 0;
+    amax_org = amax;
+
+    while Ta < 2 * Tj1 || Td < 2 * Tj2
+        count = count + 1;
+        amax = amax - amax_org * 0.1;
+        alima = amax;
+        alimd = amax;
+
+        delta = (amax^4) / (jmax^2) + 2 * (v0^2 + v1^2) + amax * (4 * (q1 - q0) - 2 * amax / jmax * (v0 + v1));
+        Tj1 = amax / jmax;
+        Ta = (amax^2 / jmax - 2 * v0 + sqrt(delta)) / (2 * amax);
+        Tj2 = amax / jmax;
+        Td = (amax^2 / jmax - 2 * v1 + sqrt(delta)) / (2 * amax);
+    end
+end
+
+% 计算轨迹
+p = [];
+vc = [];
+ac = [];
+jc = [];
+points = [];  % 插补点的三维坐标
+
+if Tv > 0
+    vlim = vmax;
+    T = Tv + Ta + Td;
+else
+    Tv = 0;
+    vlim = v0 + (Ta - Tj1) * alima;
+    T = Tv + Ta + Td;
+end
+
+% 计算直线插补的方向向量
+direction = (P2 - P1) / q1;
+
+for t = 0:mydt:T
+    if t >= 0 && t < Tj1
+        % 段1：加加速度段
+        q = q0 + v0 * t + jmax * t^3 / 6;
+        v = v0 + jmax * t^2 / 2;
+        a = jmax * t;
+        j = jmax;
+    elseif t >= Tj1 && t < (Ta - Tj1)
+        % 段2：匀加速度段
+        q = q0 + v0 * t + alima / 6 * (3 * t^2 - 3 * Tj1 * t + Tj1^2);
+        v = v0 + alima * (t - Tj1 / 2);
+        a = alima;
+        j = 0;
+    elseif t >= (Ta - Tj1) && t < Ta
+        % 段3：减加速度段
+        q = q0 + (vlim + v0) * Ta / 2 - vlim * (Ta - t) + jmax * (Ta - t)^3 / 6;
+        v = vlim - jmax * (Ta - t)^2 / 2;
+        a = jmax * (Ta - t);
+        j = -jmax;
+    elseif t >= Ta && t < (Ta + Tv)
+        % 段4：匀速段
+        q = q0 + (vlim + v0) * Ta / 2 + vlim * (t - Ta);
+        v = vlim;
+        a = 0;
+        j = 0;
+    elseif t >= (Ta + Tv) && t < (T - Td + Tj2)
+        % 段5：减加速度段
+        q = q1 - (vlim + v1) * Td / 2 + vlim * (t - T + Td) - jmax * (t - T + Td)^3 / 6;
+        v = vlim - jmax * (t - T + Td)^2 / 2;
+        a = -jmax * (t - T + Td);
+        j = -jmax;
+    elseif t >= (T - Td + Tj2) && t < (T - Tj2)
+        % 段6：匀减速度段
+        q = q1 - (vlim + v1) * Td / 2 + vlim * (t - T + Td) - alimd / 6 * (3 * (t - T + Td)^2 - 3 * Tj2 * (t - T + Td) + Tj2^2);
+        v = vlim - alimd * (t - T + Td - Tj2 / 2);
+        a = -alimd;
+        j = 0;
+    elseif t >= (T - Tj2) && t <= T
+        % 段7：减减速度段
+        q = q1 - v1 * (T - t) - jmax * (T - t)^3 / 6;
+        v = v1 + jmax * (T - t)^2 / 2;
+        a = -jmax * (T - t);
+        j = jmax;
+    end
+
+    % 将位置向量投影到三维空间
+    pos = P1 + q * direction;
+    points = [points; pos'];
+    p = [p q];
+    vc = [vc v];
+    ac = [ac a];
+    jc = [jc j];
+end
+
+% 绘制位置曲线
+subplot(4, 1, 1);
+plot(0:mydt:T, p, 'LineWidth', 2);
+xlabel('时间 (秒)');
+ylabel('位置 (mm)');
+title('位置随时间变化');
+
+% 绘制速度曲线
+subplot(4, 1, 2);
+plot(0:mydt:T, vc, 'LineWidth', 2);
+xlabel('时间 (秒)');
+ylabel('速度 (mm/s)');
+title('速度随时间变化');
+
+% 绘制加速度曲线
+subplot(4, 1, 3);
+plot(0:mydt:T, ac, 'LineWidth', 2);
+xlabel('时间 (秒)');
+ylabel('加速度 (mm/s²)');
+title('加速度随时间变化');
+
+% 绘制加加速度曲线
+subplot(4, 1, 4);
+plot(0:mydt:T, jc, 'LineWidth', 2);
+xlabel('时间 (秒)');
+ylabel('加加速度 (mm/s³)');
+title('加加速度随时间变化');
+
+% 输出插补点的三维坐标
+disp('插补点的三维坐标：');
+disp(points);
+
+% 绘制插补点的三维轨迹
+figure;
+plot3(points(:, 1), points(:, 2), points(:, 3), 'b.-');
+xlabel('X (mm)');
+ylabel('Y (mm)');
+zlabel('Z (mm)');
+title('三维空间中的插补点轨迹');
+grid on;
+
+% 结合逆解
+% 初始化结果数组，大小与points相同，但每个元素都是一个3元素的数组，用于存储t1, t2, t3
+sz = size(points);
+m = sz(1);
+n = sz(2);
+
+% 创建一个与给定数组具有相同大小和形状的全零数组
+t_results = zeros(sz);
+
+
+% 循环遍历points数组中的每一行
+for i = 1:m
+    x = points(i, 1);
+    y = points(i, 2);
+    z = points(i, 3);
+
+    % 建立方程组并计算t1, t2, t3
+    t3 = -z - sqrt(l^2 - x^2 - (y + R)^2);
+    t2 = -z - sqrt(l^2 - (x - sqrt(3)/2 * R)^2 - (R/2 - y)^2);
+    t1 = -z - sqrt(l^2 - (sqrt(3)/2 * R + x)^2 - (R/2 - y)^2);
+
+    ttt = [t1, t2, t3];
+    t_results(i, :) = ttt;
+end
+
+% 显示结果（可选）
+% 计算位移、速度、加速度和加加速度的数组
+displacement = t_results;
+velocity = zeros(m, n);
+acceleration = zeros(m, n);
+jerk = zeros(m, n);
+
+% 计算速度
+for i = 2:m-1
+    velocity(i, :) = (displacement(i + 1, :) - displacement(i - 1, :)) / (2 * mydt);
+end
+
+% 计算加速度
+for i = 3:m-2
+    acceleration(i, :) = (velocity(i + 1, :) - velocity(i - 1, :)) / (2 * mydt);
+end
+
+% 计算加加速度
+for i = 4:m-3
+    jerk(i, :) = (acceleration(i + 1, :) - acceleration(i - 1, :)) / (2 * mydt);
+end
+
+% 显示位移、速度、加速度和加加速度结果
+disp('位移:');
+disp(displacement);
+disp('速度:');
+disp(velocity);
+disp('加速度:');
+disp(acceleration);
+disp('加加速度:');
+disp(jerk);
+
+% 时间数组
+tArr = 0:mydt:(m-1)*mydt;
+
+% 绘制位移、速度、加速度和加加速度随时间变化的图表
+figure('Name', '运动参数随时间变化', 'NumberTitle', 'off');
+
+% 位移随时间的变化
+subplot(4, 1, 1);
+plot(tArr, displacement(:, 1), 'k', tArr, displacement(:, 2), 'm', tArr, displacement(:, 3), 'b');
+xlabel('时间 (s)');
+ylabel('位移 (mm)');
+title('位移随时间的变化');
+legend('t1', 't2', 't3');
+grid on;
+
+% 速度随时间的变化
+subplot(4, 1, 2);
+plot(tArr, velocity(:, 1), 'k', tArr, velocity(:, 2), 'm', tArr, velocity(:, 3), 'b');
+xlabel('时间 (s)');
+ylabel('速度 (mm/s)');
+title('速度随时间的变化');
+legend('t1', 't2', 't3');
+grid on;
+
+% 加速度随时间的变化
+subplot(4, 1, 3);
+plot(tArr, acceleration(:, 1), 'k', tArr, acceleration(:, 2), 'm', tArr, acceleration(:, 3), 'b');
+xlabel('时间 (s)');
+ylabel('加速度 (mm/s²)');
+title('加速度随时间的变化');
+legend('t1', 't2', 't3');
+grid on;
+
+% 加加速度随时间的变化
+subplot(4, 1, 4);
+plot(tArr, jerk(:, 1), 'k', tArr, jerk(:, 2), 'm', tArr, jerk(:, 3), 'b');
+xlabel('时间 (s)');
+ylabel('加加速度 (mm/s³)');
+title('加加速度随时间的变化');
+legend('t1', 't2', 't3');
+grid on;
