@@ -142,47 +142,6 @@ for t = 0:mydt:T
     jc = [jc j];
 end
 
-% 绘制位置曲线
-subplot(4, 1, 1);
-plot(0:mydt:T, p, 'LineWidth', 2);
-xlabel('时间 (秒)');
-ylabel('位置 (mm)');
-title('位置随时间变化');
-
-% 绘制速度曲线
-subplot(4, 1, 2);
-plot(0:mydt:T, vc, 'LineWidth', 2);
-xlabel('时间 (秒)');
-ylabel('速度 (mm/s)');
-title('速度随时间变化');
-
-% 绘制加速度曲线
-subplot(4, 1, 3);
-plot(0:mydt:T, ac, 'LineWidth', 2);
-xlabel('时间 (秒)');
-ylabel('加速度 (mm/s²)');
-title('加速度随时间变化');
-
-% 绘制加加速度曲线
-subplot(4, 1, 4);
-plot(0:mydt:T, jc, 'LineWidth', 2);
-xlabel('时间 (秒)');
-ylabel('加加速度 (mm/s³)');
-title('加加速度随时间变化');
-
-% 输出插补点的三维坐标
-disp('插补点的三维坐标：');
-disp(points);
-
-% 绘制插补点的三维轨迹
-figure;
-plot3(points(:, 1), points(:, 2), points(:, 3), 'b.-');
-xlabel('X (mm)');
-ylabel('Y (mm)');
-zlabel('Z (mm)');
-title('三维空间中的插补点轨迹');
-grid on;
-
 % 结合逆解
 % 初始化结果数组，大小与points相同，但每个元素都是一个3元素的数组，用于存储t1, t2, t3
 sz = size(points);

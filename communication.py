@@ -4,13 +4,13 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout
 from PyQt5.QtCore import QThread, pyqtSignal
 import serial
 import serial.tools.list_ports
+import struct
 
 class SerialThread(QThread):
     received_data = pyqtSignal(str)
     error_signal = pyqtSignal(str)
 
     def __init__(self, port, baudrate):
-        super().__init__()
         self.serial = serial.Serial()
         self.serial.port = port
         self.serial.baudrate = baudrate
@@ -36,6 +36,8 @@ class SerialThread(QThread):
         if self.serial.is_open:
             self.serial.close()
 
+
+
     def write_data(self, data):
         if self.serial.is_open:
             try:
@@ -45,10 +47,37 @@ class SerialThread(QThread):
 
 class Communication:
     def __init__(self):
-        super().__init__()
-
-        self.initUI()
         self.serial_thread = None
+
+    def packing(self,points, velocity, acceleration, jerk):
+        packges=[]
+
+        length=len(points)-1
+        for i in range(length):
+            packge = []
+            packge.append(points[i])
+            packge.append(points[i+1])
+            packge.append(velocity[i])
+            packge.append(acceleration[i])
+            packge.append(jerk[i])
+            packges.append(packge)
+        return packges
+
+    def write(self,package):
+        data = package
+
+        # 包头和包尾
+        header = b'\xFF'
+        footer = b'\xFE'
+
+        # 打包数据部分，使用'<'作为小端序的指定，'d'表示双精度浮点数
+        packed_data = b''
+        for point in data:
+            packed_data += struct.pack('<3d', *point)  # 每个点包含3个双精度浮点数
+
+        # 完整的数据包
+        complete_packet = header + packed_data + footer
+        return complete_packet
 
     def refresh_ports(self):
         self.port_combo.clear()
@@ -71,9 +100,8 @@ class Communication:
             self.open_button.setText("关闭串口")
             print("串口已打开")
 
-    def send_data(self):
+    def send_data(self,data):
         if self.serial_thread and self.serial_thread.serial.is_open:
-            data = self.send_area.toPlainText()
             self.serial_thread.write_data(data)
             print(f"发送数据: {data}")
         else:
