@@ -141,7 +141,7 @@ class DeltaRobotKinematics:
         mydt=0.1
 
         q0=0
-        q1=P2-P1
+        q1=np.linalg.norm(P2 - P1)
         vmax=20
         amax=15
         v0=0
@@ -171,9 +171,6 @@ class DeltaRobotKinematics:
             Td = Tj2 + (vmax - v1) / amax
             alimd = amax
 
-        # 位移
-        q0 = 0
-        q1 = 100  # 示例值，需要根据实际情况替换
 
         Tv = (q1 - q0) / vmax - Ta / 2 * (1 + v0 / vmax) - Td / 2 * (1 + v1 / vmax)
         if Tv <= 0:
@@ -303,4 +300,4 @@ class DeltaRobotKinematics:
                 jerk[i] = [(acceleration[i + 1][j] - acceleration[i - 1][j]) / (2 * mydt) for j in range(n)]
 
 
-        return points, velocity, acceleration, jerk
+        return points, vc, ac, jerk

@@ -49,6 +49,39 @@ class Communication:
     def __init__(self):
         self.serial_thread = None
 
+    def process_number(self,num):
+        # 四舍五入取整
+        rounded_num = round(num)
+
+        # 判断原来的数是正还是负
+        is_negative = rounded_num < 0
+
+        # 如果是负数，取其绝对值进行后续处理
+        if is_negative:
+            rounded_num = abs(rounded_num)
+
+        # 转换为16进制
+        hex_num = hex(int(rounded_num))
+
+        # 把16进制转换成2进制
+        bin_num = bin(int(hex_num, 16))
+
+        # 取二进制反码
+        bin_num_inverse = ''.join('1' if bit == '0' else '0' for bit in bin_num[2:])
+
+        # 如果是负数，采用2进制补码
+        if is_negative:
+            # 找到最高位的1，然后取反
+            index_of_first_one = bin_num_inverse.find('1')
+            bin_num_complement = bin_num_inverse[:index_of_first_one] + bin_num[2:][index_of_first_one:]
+        else:
+            bin_num_complement = bin_num_inverse
+
+        # 把这个2进制转化为16进制
+        hex_result = hex(int(bin_num_complement, 2))[2:].zfill(4)
+
+        return hex_result
+
     def packing(self,points, velocity, acceleration, jerk):
         packges=[]
 
@@ -59,25 +92,45 @@ class Communication:
             packge.append(points[i+1])
             packge.append(velocity[i])
             packge.append(acceleration[i])
-            packge.append(jerk[i])
+            # packge.append(jerk[i])
             packges.append(packge)
+            # print(packge)
         return packges
 
     def write(self,package):
         data = package
+        # package[[x1,y1,z1],[x2,y2,z2],v,a]
+        # print(data[0][0])
 
         # 包头和包尾
-        header = b'\xFF'
-        footer = b'\xFE'
+        header = 'FF01'
+        footer = 'FE'
+        x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
+        v1,a1=data[2],data[3]
+        # print(x1)
+        a=self.process_number(x1)
+        b=self.process_number(y1)
+        c=self.process_number(z1)
+        d=self.process_number(x2)
+        e=self.process_number(y2)
+        f=self.process_number(z2)
 
-        # 打包数据部分，使用'<'作为小端序的指定，'d'表示双精度浮点数
-        packed_data = b''
-        for point in data:
-            packed_data += struct.pack('<3d', *point)  # 每个点包含3个双精度浮点数
+        g=self.process_number(v1)
+        h=self.process_number(a1)
 
-        # 完整的数据包
-        complete_packet = header + packed_data + footer
-        return complete_packet
+        complete_package=''
+        complete_package+=header
+        complete_package+=a
+        #complete_package+=d
+        complete_package+=b
+        #complete_package+=e
+        complete_package+=c
+        #complete_package+=f
+        complete_package+=g
+        complete_package+=h
+        complete_package+=footer
+        #print(complete_package)
+        return complete_package
 
     def refresh_ports(self):
         self.port_combo.clear()
