@@ -49,7 +49,7 @@ class Communication:
     def __init__(self):
         self.serial_thread = None
 
-    def process_number(self,num):
+    def process_number1(self,num):
         # 四舍五入取整
         rounded_num = round(num)
 
@@ -82,6 +82,39 @@ class Communication:
 
         return hex_result
 
+    def process_number2(self,num):
+        # 四舍五入取整
+        rounded_num = round(num)
+
+        # 判断原来的数是正还是负
+        is_negative = rounded_num < 0
+
+        # 如果是负数，取其绝对值进行后续处理
+        if is_negative:
+            rounded_num = abs(rounded_num)
+
+        # 转换为16进制
+        hex_num = hex(int(rounded_num))
+
+        # 把16进制转换成2进制
+        bin_num = bin(int(hex_num, 16))
+
+        # 取二进制反码
+        bin_num_inverse = ''.join('1' if bit == '0' else '0' for bit in bin_num[2:])
+
+        # 如果是负数，采用2进制补码
+        if is_negative:
+            # 找到最高位的1，然后取反
+            index_of_first_one = bin_num_inverse.find('1')
+            bin_num_complement = bin_num_inverse[:index_of_first_one] + bin_num[2:][index_of_first_one:]
+        else:
+            bin_num_complement = bin_num_inverse
+
+        # 把这个2进制转化为16进制
+        hex_result = hex(int(bin_num_complement, 2))[2:].zfill(2)
+
+        return hex_result
+
     def packing(self,points, velocity, acceleration, jerk):
         packges=[]
 
@@ -108,15 +141,15 @@ class Communication:
         x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
         v1,a1=data[2],data[3]
         # print(x1)
-        a=self.process_number(x1)
-        b=self.process_number(y1)
-        c=self.process_number(z1)
-        d=self.process_number(x2)
-        e=self.process_number(y2)
-        f=self.process_number(z2)
+        a=self.process_number1(x1)
+        b=self.process_number1(y1)
+        c=self.process_number1(z1)
+        d=self.process_number1(x2)
+        e=self.process_number1(y2)
+        f=self.process_number1(z2)
 
-        g=self.process_number(v1)
-        h=self.process_number(a1)
+        g=self.process_number2(v1)
+        h=self.process_number2(a1)
 
         complete_package=''
         complete_package+=header
