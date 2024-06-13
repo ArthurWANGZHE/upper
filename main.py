@@ -1,13 +1,11 @@
-# 程序入口
 import sys
 from PyQt5.QtWidgets import QApplication
-from mainwindow import MainWindow
-
-def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
+from Ui import Ui
+from communication import Communication
 
 if __name__ == '__main__':
-    main()
+    app = QApplication(sys.argv)
+    ui = Ui()
+    comm = Communication(ui)
+    ui.show()
+    sys.exit(app.exec_())

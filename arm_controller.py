@@ -1,7 +1,11 @@
 # 实现点动、寸动以及急停
 from Delta_robot import DeltaRobotKinematics
 from communication import Communication
+from joblib import dump, load
+from camera import camera_still
+from camera import camera_vedio
 # from utils import ws
+#model_filename=""
 class ArmController:
     def __init__(self):
         self.robot= DeltaRobotKinematics(390,
@@ -9,6 +13,7 @@ class ArmController:
                          241,
                          300)
         self.communication = Communication()
+        #classifier = load(model_filename)
 
     """
     def cal_ws(self):
@@ -92,3 +97,13 @@ class ArmController:
     def point2point(self, x1,y1,z1,x2,y2,z2):
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         return points, velocity, acceleration, jerk
+
+    def classify(self,classifer,classes):
+        frame=camera_still()
+        pass
+
+    def recieve_data(self):
+        self.communication.receive_data()
+
+    def is_connected(self):
+        print(self.communication.is_serial_connected())

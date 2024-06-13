@@ -5,12 +5,14 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import serial
 import serial.tools.list_ports
 import struct
+from Ui import Ui
 
 class SerialThread(QThread):
     received_data = pyqtSignal(str)
     error_signal = pyqtSignal(str)
 
     def __init__(self, port, baudrate):
+        super().__init__()
         self.serial = serial.Serial()
         self.serial.port = port
         self.serial.baudrate = baudrate
@@ -36,8 +38,6 @@ class SerialThread(QThread):
         if self.serial.is_open:
             self.serial.close()
 
-
-
     def write_data(self, data):
         if self.serial.is_open:
             try:
@@ -45,9 +45,21 @@ class SerialThread(QThread):
             except Exception as e:
                 self.error_signal.emit(str(e))
 
+
 class Communication:
-    def __init__(self):
-        self.serial_thread = None
+    def __init__(self, port='COM6', baudrate=9600):
+        self.serial_thread = SerialThread(port, baudrate)
+        self.serial_thread.received_data.connect(self.receive_data)
+        self.serial_thread.error_signal.connect(self.handle_error)
+        self.serial_thread.start()
+        # Adding a small delay to ensure the serial port has time to open
+        import time
+        time.sleep(0.1)  # Adjust the delay as needed
+
+
+    def is_serial_connected(self):
+        return self.serial_thread.serial.is_open
+
 
     def process_number1(self,num):
         # 四舍五入取整
@@ -194,7 +206,7 @@ class Communication:
             print("串口未打开或发送线程未启动")
 
     def receive_data(self, data):
-        self.receive_area.insertPlainText(data)
+        print(f"接收到的数据: {data}")
 
     def handle_error(self, error_message):
         print(f"发生错误: {error_message}")
