@@ -16,6 +16,8 @@ class SerialThread(QThread):
         self.serial = serial.Serial()
         self.serial.port = port
         self.serial.baudrate = baudrate
+        self.serial.bytesize = 8  # 设置数据位
+        self.serial.stopbits = 1  # 设置停止位
         self.running = False
 
     def run(self):
@@ -198,10 +200,16 @@ class Communication:
             self.open_button.setText("关闭串口")
             print("串口已打开")
 
-    def send_data(self,data):
+    def send_data(self, data):
         if self.serial_thread and self.serial_thread.serial.is_open:
-            self.serial_thread.write_data(data)
+            # 将十六进制字符串转换为字节
+            data_bytes = bytes.fromhex(data)
+            self.serial_thread.serial.write(data_bytes)
             print(f"发送数据: {data}")
+            # 接收并处理返回的信息
+            response = self.serial_thread.serial.read(8).decode('utf-8')
+            print(f"接收到返回信息: {response}")
+
         else:
             print("串口未打开或发送线程未启动")
 
