@@ -33,7 +33,7 @@ class ArmController:
         for i in range(len(packages)):
             protocol=self.communication.write(packages[i])
             self.communication.send_data(protocol)
-            # print(protocol)
+            print(protocol)
             # response = self.communication.receive_data()
             # print(f"接收到返回信息: {response}")
 

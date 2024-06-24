@@ -5,7 +5,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import serial
 import serial.tools.list_ports
 import struct
-from Ui import Ui
+
 
 class SerialThread(QThread):
     received_data = pyqtSignal(str)
@@ -49,7 +49,7 @@ class SerialThread(QThread):
 
 
 class Communication:
-    def __init__(self, port='COM6', baudrate=9600):
+    def __init__(self, port='COM3', baudrate=9600):
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
@@ -73,10 +73,12 @@ class Communication:
         # 如果是负数，取其绝对值进行后续处理
         if is_negative:
             rounded_num = abs(rounded_num)
+        hex_num = hex(int(rounded_num))[2:]
 
-        # 转换为16进制
-        hex_num = hex(int(rounded_num))
+        hex_result = hex_num.zfill(4)
 
+
+        """
         # 把16进制转换成2进制
         bin_num = bin(int(hex_num, 16))
 
@@ -93,6 +95,7 @@ class Communication:
 
         # 把这个2进制转化为16进制
         hex_result = hex(int(bin_num_complement, 2))[2:].zfill(4)
+        """
 
         return hex_result
 
@@ -150,11 +153,26 @@ class Communication:
         # print(data[0][0])
 
         # 包头和包尾
-        header = 'FF01'
+        header = 'FF0'
         footer = 'FE'
         x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
         v1,a1=data[2],data[3]
         # print(x1)
+        mse=1000
+        if x1 >=0:
+            mse=mse+100
+        if y1>=0:
+            mse=mse+10
+        if z1>=0:
+            mse=mse+1
+        # print(mse)
+        mse_str=str(mse)
+        oo=int(mse_str,2)
+        hex_num=hex(oo)
+        # print(hex_num)
+        int_num = int(hex_num, 16)
+        rnum = hex(int_num)[2:]
+
         a=self.process_number1(x1)
         b=self.process_number1(y1)
         c=self.process_number1(z1)
@@ -167,17 +185,25 @@ class Communication:
 
         complete_package=''
         complete_package+=header
+        complete_package += rnum
+        complete_package+=' '
         complete_package+=a
         #complete_package+=d
+        complete_package += ' '
         complete_package+=b
         #complete_package+=e
+        complete_package += ' '
         complete_package+=c
         #complete_package+=f
+        complete_package += ' '
         complete_package+=g
+        complete_package += ' '
         complete_package+=h
+        complete_package += ' '
         complete_package+=footer
         #print(complete_package)
         return complete_package
+
 
     def refresh_ports(self):
         self.port_combo.clear()
