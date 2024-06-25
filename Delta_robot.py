@@ -10,8 +10,8 @@ class DeltaRobotKinematics:
         self.base_radius = static_dia / 2  # 静平台半径
         self.top_radius = moving_dia / 2  # 动平台半径
         self.theta = math.radians(120)  # 角度转换为弧度
-        self.xyz=[0.0, -1.4210854715202004e-14, -140.71247279470288]
-        self.t=[300,300,300]
+        self.xyz=[0.0, 0.0, -273.92]
+        self.t=[0,0,0]
 
 
     def inverse_kinematics(self, t1, t2, t3):
@@ -138,7 +138,7 @@ class DeltaRobotKinematics:
         R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
 
         l = self.link_length
-        mydt=0.1
+        mydt=0.5
 
         q0=0
         q1=np.linalg.norm(P2 - P1)

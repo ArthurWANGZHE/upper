@@ -49,7 +49,7 @@ class SerialThread(QThread):
 
 
 class Communication:
-    def __init__(self, port='COM3', baudrate=9600):
+    def __init__(self, port='COM7', baudrate=9600):
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
@@ -157,6 +157,8 @@ class Communication:
         footer = 'FE'
         x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
         v1,a1=data[2],data[3]
+        ppp=[x1,y1,z1,x2,y2,z2,v1,a1]
+        #print(ppp)
         # print(x1)
         mse=1000
         if x1 >=0:
@@ -233,14 +235,17 @@ class Communication:
             self.serial_thread.serial.write(data_bytes)
             print(f"发送数据: {data}")
             # 接收并处理返回的信息
-            response = self.serial_thread.serial.read(8).decode('utf-8')
-            print(f"接收到返回信息: {response}")
+            # response = self.serial_thread.serial.read(2).decode('utf-8')
+            # print(f"接收到返回信息: {response}")
 
         else:
             print("串口未打开或发送线程未启动")
 
-    def receive_data(self, data):
-        print(f"接收到的数据: {data}")
+    def receive_data(self):
+        # 接收并处理返回的信息
+        response = self.serial_thread.serial.read(2).decode('utf-8')
+        # print(f"接收到返回信息: {response}")
+        return response
 
     def handle_error(self, error_message):
         print(f"发生错误: {error_message}")

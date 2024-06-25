@@ -4,13 +4,14 @@ from communication import Communication
 from joblib import dump, load
 from camera import camera_still
 from camera import camera_vedio
+import time
 # from utils import ws
 #model_filename=""
 class ArmController:
     def __init__(self):
-        self.robot= DeltaRobotKinematics(390,
-                         120,
-                         241,
+        self.robot= DeltaRobotKinematics(133,
+                         60,
+                         251,
                          300)
         self.communication = Communication()
         #classifier = load(model_filename)
@@ -30,12 +31,35 @@ class ArmController:
         x2,y2,z2 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
-        for i in range(len(packages)):
-            protocol=self.communication.write(packages[i])
-            self.communication.send_data(protocol)
-            print(protocol)
-            # response = self.communication.receive_data()
-            # print(f"接收到返回信息: {response}")
+        flag=0
+        i=0
+        print(len(packages))
+        while i<len(packages)-1:
+            while flag!=1:
+                protocol=self.communication.write(packages[i])
+
+                self.communication.send_data(protocol)
+            # time.sleep(1)
+                response = self.communication.receive_data()
+                print(response)
+                if response !="":
+                    flag=0
+                    i=i+1
+
+                else:
+                    flag=1
+                    print("no data")
+                    break
+            while flag ==1:
+                print("no data")
+                time.sleep(0.5)
+                response = self.communication.receive_data()
+                if response !="":
+                    flag=0
+                else:
+                    flag=1
+
+            #print(f"接收到返回信息: {response}")
 
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new

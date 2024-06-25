@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication
 from Ui import MainWindow
 from communication import Communication
 from arm_controller import ArmController
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
