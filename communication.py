@@ -158,7 +158,7 @@ class Communication:
         x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
         v1,a1=data[2],data[3]
         ppp=[x1,y1,z1,x2,y2,z2,v1,a1]
-        #print(ppp)
+        print(ppp)
         # print(x1)
         mse=1000
         if x1 >=0:

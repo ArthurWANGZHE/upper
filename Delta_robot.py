@@ -138,7 +138,7 @@ class DeltaRobotKinematics:
         R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
 
         l = self.link_length
-        mydt=0.5
+        mydt=0.01
 
         q0=0
         q1=np.linalg.norm(P2 - P1)

@@ -31,6 +31,7 @@ class ArmController:
         x2,y2,z2 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
+        # print(packages)
         flag=0
         i=0
         print(len(packages))
@@ -90,6 +91,7 @@ class ArmController:
         packages=self.communication.packing(points, velocity, acceleration, jerk)
         for i in range(len(packages)):
             protocol=self.communication.write(packages[i])
+            print(protocol)
             self.communication.send_data(protocol)
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new
