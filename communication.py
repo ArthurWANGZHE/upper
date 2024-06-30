@@ -5,6 +5,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import serial
 import serial.tools.list_ports
 import struct
+import time
 
 
 class SerialThread(QThread):
@@ -246,6 +247,37 @@ class Communication:
         response = self.serial_thread.serial.read(2).decode('utf-8')
         # print(f"接收到返回信息: {response}")
         return response
+
+    def send_package(self,packages):
+        flag=0
+        i=0
+        print(len(packages))
+        while i<len(packages)-1:
+            while flag!=1:
+                protocol=self.write(packages[i])
+
+                self.send_data(protocol)
+            # time.sleep(1)
+                response = self.receive_data()
+                print(response)
+                if response !="":
+                    flag=0
+                    i=i+1
+
+                else:
+                    flag=1
+                    print("no data")
+                    break
+            while flag ==1:
+                print("no data")
+                time.sleep(0.5)
+                response = self.receive_data()
+                if response !="":
+                    flag=0
+                else:
+                    flag=1
+            print("Finish sending")
+            return
 
     def handle_error(self, error_message):
         print(f"发生错误: {error_message}")

@@ -31,37 +31,7 @@ class ArmController:
         x2,y2,z2 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
-        # print(packages)
-        flag=0
-        i=0
-        print(len(packages))
-        while i<len(packages)-1:
-            while flag!=1:
-                protocol=self.communication.write(packages[i])
-
-                self.communication.send_data(protocol)
-            # time.sleep(1)
-                response = self.communication.receive_data()
-                print(response)
-                if response !="":
-                    flag=0
-                    i=i+1
-
-                else:
-                    flag=1
-                    print("no data")
-                    break
-            while flag ==1:
-                print("no data")
-                time.sleep(0.5)
-                response = self.communication.receive_data()
-                if response !="":
-                    flag=0
-                else:
-                    flag=1
-
-            #print(f"接收到返回信息: {response}")
-
+        self.communication.send_package(packages)
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new
         return
@@ -75,9 +45,7 @@ class ArmController:
         x2,y2,z2 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
-        for i in range(len(packages)):
-            protocol=self.communication.write(packages[i])
-            self.communication.send_data(protocol)
+        self.communication.send_package(packages)
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new
         return
@@ -89,27 +57,30 @@ class ArmController:
         x2,y2,z2 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
-        for i in range(len(packages)):
-            protocol=self.communication.write(packages[i])
-            print(protocol)
-            self.communication.send_data(protocol)
+        self.communication.send_package(packages)
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new
         return
 
     # 指定点到点
-    def move_arm_w(self, x_n,y_n,z_n):
+    def move_arm_2p(self, x_n,y_n,z_n):
         x1,y1,z1 = self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2]
         x2,y2,z2 = x_n,y_n,z_n
         self.robot.xyz=[x_n,y_n,z_n]
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         packages=self.communication.packing(points, velocity, acceleration, jerk)
-        for i in range(len(packages)):
-            protocol=self.communication.write(packages[i])
-            self.communication.send_data(protocol)
+        self.communication.send_package(packages)
         t_new = self.robot.forward_kinematics(self.robot.xyz[0],self.robot.xyz[1],self.robot.xyz[2])
         self.robot.t=t_new
         return
+
+    def move_gate_curve(self):
+        # 归零
+        #ff0x02fe
+        # 门型曲线
+        points, velocity, acceleration, jerk=self.robot.gate_curve()
+        packages=self.communication.packing(points, velocity, acceleration)
+        self.communication.send_package(packages)
 
     # 急停
     def stop(self):
@@ -117,22 +88,9 @@ class ArmController:
         command = "STOP\n"
         self.send_command(command)
 
-    def send_command(self, command):
-        if self.communication.serial_thread and self.communication.serial_thread.serial.is_open:
-            self.communication.serial_thread.write_data(command)
-        else:
-            print("串口未打开或发送线程未启动")
 
     def point2point(self, x1,y1,z1,x2,y2,z2):
         points, velocity, acceleration, jerk=self.robot.point2point(x1, y1, z1, x2, y2, z2)
         return points, velocity, acceleration, jerk
 
-    def classify(self,classifer,classes):
-        frame=camera_still()
-        pass
 
-    def recieve_data(self):
-        self.communication.receive_data()
-
-    def is_connected(self):
-        print(self.communication.is_serial_connected())
