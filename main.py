@@ -1,20 +1,40 @@
-import sys
-from PyQt5.QtWidgets import QApplication
-from Ui import MainWindow
-from communication import Communication
+from PyQt5 import QtWidgets
+from UI import Ui_MainWindow
 from arm_controller import ArmController
+from communication import Communication
+"""
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        """
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+        self.arm = ArmController()
+        self.com = Communication()
+
+        # Connect buttons to their functions
+        self.btnOpen_2.clicked.connect(lambda: self.arm.move_arm_x(1))
+        self.btnOpen_3.clicked.connect(lambda: self.arm.move_arm_x(-1))
+        self.btnOpen_4.clicked.connect(lambda: self.arm.move_arm_y(1))
+        self.btnOpen_5.clicked.connect(lambda: self.arm.move_arm_y(-1))
+        self.btnOpen_6.clicked.connect(lambda: self.arm.move_arm_z(1))
+        self.btnOpen_7.clicked.connect(lambda: self.arm.move_arm_z(-1))
+        self.btnOpen.clicked.connect(self.com.open_serial)
+        self.btnSend.clicked.connect(lambda: self.com.send_data(self.txt1.text()))
+        self.btnOpen_8.clicked.connect(lambda: self.arm.move_arm_x(0.1))
+        self.btnOpen_9.clicked.connect(lambda: self.arm.move_arm_x(-0.1))
+        self.btnOpen_10.clicked.connect(lambda: self.arm.move_arm_y(0.1))
+        self.btnOpen_11.clicked.connect(lambda: self.arm.move_arm_y(-0.1))
+        self.btnOpen_12.clicked.connect(lambda: self.arm.move_arm_z(0.1))
+        self.btnOpen_13.clicked.connect(lambda: self.arm.move_arm_z(-0.1))
+
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    arm_controller = ArmController()
-
+    app = QtWidgets.QApplication([])
     window = MainWindow()
-    window.move_x_button.clicked.connect(lambda: arm_controller.move_arm_x(1))  # Move 1 unit along x axis
-    window.move_y_button.clicked.connect(lambda: arm_controller.move_arm_y(1))  # Move 1 unit along y axis
-    window.move_z_button.clicked.connect(lambda: arm_controller.move_arm_z(1))  # Move 1 unit along z axis
-    window.stop_button.clicked.connect(arm_controller.stop)
-
     window.show()
-
-    sys.exit(app.exec_())
+    app.exec_()

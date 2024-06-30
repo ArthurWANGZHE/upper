@@ -2,10 +2,12 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLabel, QComboBox, QHBoxLayout)
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5 import QtCore, QtGui, QtWidgets
 import serial
 import serial.tools.list_ports
 import struct
 import time
+from UI import Ui_MainWindow
 
 
 class SerialThread(QThread):
@@ -49,8 +51,10 @@ class SerialThread(QThread):
                 self.error_signal.emit(str(e))
 
 
-class Communication:
-    def __init__(self, port='COM7', baudrate=9600):
+class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
+    #def __init__(self, port='COM7', baudrate=9600):
+    def __init__(self, parent=None):
+        """
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
@@ -58,6 +62,29 @@ class Communication:
         # Adding a small delay to ensure the serial port has time to open
         import time
         time.sleep(0.1)  # Adjust the delay as needed
+        """
+        super().__init__(parent)  # 确保首先调用 QMainWindow 的构造函数
+        self.setupUi(self)  # 然后调用 setupUi 来设置 UI 组件
+        self.setWindowTitle("Select Serial Port and Baudrate")
+        self.layout = QVBoxLayout()
+
+        self.port_label = QLabel("Select Port:")
+        self.layout.addWidget(self.port_label)
+
+        self.port_combo = QComboBox()
+        self.refresh_ports()
+        self.layout.addWidget(self.port_combo)
+
+        self.baudrate_label = QLabel("Select Baudrate:")
+        self.layout.addWidget(self.baudrate_label)
+
+        self.baudrate_combo = QComboBox()
+        self.baudrate_combo.addItems(["9600", "19200", "38400", "57600", "115200"])
+        self.layout.addWidget(self.baudrate_combo)
+
+
+        self.setLayout(self.layout)
+
 
 
     def is_serial_connected(self):
