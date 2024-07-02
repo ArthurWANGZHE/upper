@@ -1,11 +1,12 @@
 # 定义通信协议，实现串口通信
-import time
-
+import sys
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLabel, QComboBox, QHBoxLayout)
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5 import QtCore, QtGui, QtWidgets
 import serial
 import serial.tools.list_ports
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QThread, pyqtSignal
-
+import struct
+import time
 from UI import Ui_MainWindow
 
 
@@ -51,8 +52,8 @@ class SerialThread(QThread):
 
 
 class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
-    # def __init__(self, port='COM7', baudrate=9600):
-    # def __init__(self, parent=None):
+    #def __init__(self, port='COM7', baudrate=9600):
+    #def __init__(self, parent=None):
     """
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
@@ -62,20 +63,45 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         import time
         time.sleep(0.1)  # Adjust the delay as needed
     """
+    def __init__(self, parent=None):
+        super().__init__(parent)  # 确保首先调用 QMainWindow 的构造函数
+        self.setupUi(self)  # 然后调用 setupUi 来设置 UI 组件
+        self.setWindowTitle("Select Serial Port and Baudrate")
+        self.layout = QVBoxLayout()
 
-    def __init__(self, port='COM13', baudrate=38400):
-        self.serial_thread = SerialThread(port, baudrate)
+        self.port_label = QLabel("Select Port:")
+        self.layout.addWidget(self.port_label)
+
+        self.port_combo = QComboBox()
+        self.refresh_ports()
+        self.layout.addWidget(self.port_combo)
+
+        self.baudrate_label = QLabel("Select Baudrate:")
+        self.layout.addWidget(self.baudrate_label)
+
+        self.baudrate_combo = QComboBox()
+        self.baudrate_combo.addItems(["9600", "19200", "38400", "57600", "115200"])
+        self.layout.addWidget(self.baudrate_combo)
+
+        self.central_widget = QtWidgets.QWidget()
+        self.central_widget.setLayout(self.layout)
+        self.setCentralWidget(self.central_widget)
+
+        # 初始化 serial_thread
+        selected_port = self.port_combo.currentText().split(" - ")[0]
+        selected_baudrate = int(self.baudrate_combo.currentText())
+        self.serial_thread = SerialThread(selected_port, selected_baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
         self.serial_thread.start()
-        # Adding a small delay to ensure the serial port has time to open
-        import time
-        time.sleep(0.1)  # Adjust the delay as needed
+
+
 
     def is_serial_connected(self):
         return self.serial_thread.serial.is_open
 
-    def process_number1(self, num):
+
+    def process_number1(self,num):
         # 四舍五入取整
         rounded_num = round(num)
 
@@ -88,6 +114,7 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         hex_num = hex(int(rounded_num))[2:]
 
         hex_result = hex_num.zfill(4)
+
 
         """
         # 把16进制转换成2进制
@@ -110,7 +137,7 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return hex_result
 
-    def process_number2(self, num):
+    def process_number2(self,num):
         # 四舍五入取整
         rounded_num = round(num)
 
@@ -143,14 +170,14 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return hex_result
 
-    def packing(self, points, velocity, acceleration, jerk):
-        packges = []
+    def packing(self,points, velocity, acceleration, jerk):
+        packges=[]
 
-        length = len(points) - 1
+        length=len(points)-1
         for i in range(length):
             packge = []
             packge.append(points[i])
-            packge.append(points[i + 1])
+            packge.append(points[i+1])
             packge.append(velocity[i])
             packge.append(acceleration[i])
             # packge.append(jerk[i])
@@ -158,7 +185,7 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
             # print(packge)
         return packges
 
-    def write(self, package):
+    def write(self,package):
         data = package
         # package[[x1,y1,z1],[x2,y2,z2],v,a]
         # print(data[0][0])
@@ -166,57 +193,57 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         # 包头和包尾
         header = 'FF0'
         footer = 'FE'
-        x1, y1, z1, x2, y2, z2 = data[0][0] * 100, data[0][1] * 100, data[0][2] * 100, data[1][0] * 100, data[1][
-            1] * 100, data[1][2] * 100
-        v1, a1 = data[2], data[3]
-        ppp = [x1, y1, z1, x2, y2, z2, v1, a1]
+        x1,y1,z1,x2,y2,z2 = data[0][0]*100,data[0][1]*100,data[0][2]*100,data[1][0]*100,data[1][1]*100,data[1][2]*100
+        v1,a1=data[2],data[3]
+        ppp=[x1,y1,z1,x2,y2,z2,v1,a1]
         print(ppp)
         # print(x1)
-        mse = 1000
-        if x1 >= 0:
-            mse = mse + 100
-        if y1 >= 0:
-            mse = mse + 10
-        if z1 >= 0:
-            mse = mse + 1
+        mse=1000
+        if x1 >=0:
+            mse=mse+100
+        if y1>=0:
+            mse=mse+10
+        if z1>=0:
+            mse=mse+1
         # print(mse)
-        mse_str = str(mse)
-        oo = int(mse_str, 2)
-        hex_num = hex(oo)
+        mse_str=str(mse)
+        oo=int(mse_str,2)
+        hex_num=hex(oo)
         # print(hex_num)
         int_num = int(hex_num, 16)
         rnum = hex(int_num)[2:]
 
-        a = self.process_number1(x1)
-        b = self.process_number1(y1)
-        c = self.process_number1(z1)
-        d = self.process_number1(x2)
-        e = self.process_number1(y2)
-        f = self.process_number1(z2)
+        a=self.process_number1(x1)
+        b=self.process_number1(y1)
+        c=self.process_number1(z1)
+        d=self.process_number1(x2)
+        e=self.process_number1(y2)
+        f=self.process_number1(z2)
 
-        g = self.process_number2(v1)
-        h = self.process_number2(a1)
+        g=self.process_number2(v1)
+        h=self.process_number2(a1)
 
-        complete_package = ''
-        complete_package += header
+        complete_package=''
+        complete_package+=header
         complete_package += rnum
+        complete_package+=' '
+        complete_package+=a
+        #complete_package+=d
         complete_package += ' '
-        complete_package += a
-        # complete_package+=d
+        complete_package+=b
+        #complete_package+=e
         complete_package += ' '
-        complete_package += b
-        # complete_package+=e
+        complete_package+=c
+        #complete_package+=f
         complete_package += ' '
-        complete_package += c
-        # complete_package+=f
+        complete_package+=g
         complete_package += ' '
-        complete_package += g
+        complete_package+=h
         complete_package += ' '
-        complete_package += h
-        complete_package += ' '
-        complete_package += footer
-        # print(complete_package)
+        complete_package+=footer
+        #print(complete_package)
         return complete_package
+
 
     def refresh_ports(self):
         self.port_combo.clear()
@@ -254,56 +281,40 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def receive_data(self):
         # 接收并处理返回的信息
-        response = self.serial_thread.serial.read(1).decode('utf-8')
+        response = self.serial_thread.serial.read(2).decode('utf-8')
         # print(f"接收到返回信息: {response}")
         return response
 
-    def send_package(self, packages):
-        flag = 0
-        i = 0
+    def send_package(self,packages):
+        flag=0
+        i=0
         print(len(packages))
-        while i < len(packages) - 1:
-            while flag != 1 and i < len(packages)-1:
-                protocol = self.write(packages[i])
+        while i<len(packages)-1:
+            while flag!=1:
+                protocol=self.write(packages[i])
+
                 self.send_data(protocol)
-                # time.sleep(0.01)
+            # time.sleep(1)
                 response = self.receive_data()
-                print(" ".join(hex(byte) for byte in response.encode("utf-8")))
-                if response != "":
-                    flag = 0
-                    i = i + 1
+                print(response)
+                if response !="":
+                    flag=0
+                    i=i+1
 
                 else:
-                    flag = 1
+                    flag=1
                     print("no data")
                     break
-            while flag == 1:
+            while flag ==1:
                 print("no data")
-                time.sleep(0.01)
+                time.sleep(0.5)
                 response = self.receive_data()
-                if response != "":
-                    flag = 0
+                if response !="":
+                    flag=0
                 else:
-                    flag = 1
-                    break
+                    flag=1
             print("Finish sending")
             return
-        """
-
-    def send_package(self, packages):
-        i = 0
-        print(len(packages))
-        while i < len(packages):
-            protocol = self.write(packages[i])
-            self.send_data(protocol)
-            response = self.receive_data()
-            print(response)
-            if response != "":
-                i += 1
-            else:
-                print("no data")
-        print("Finish sending")
-        """
 
     def handle_error(self, error_message):
         print(f"发生错误: {error_message}")

@@ -79,7 +79,7 @@ class ArmController:
         #ff0x02fe
         # 门型曲线
         points, velocity, acceleration, jerk=self.robot.gate_curve()
-        packages=self.communication.packing(points, velocity, acceleration)
+        packages=self.communication.packing(points, velocity, acceleration,jerk)
         self.communication.send_package(packages)
 
     # 急停

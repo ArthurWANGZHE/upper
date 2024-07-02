@@ -13,7 +13,7 @@ class DeltaRobotKinematics:
         self.vmax=20
         self.amax=15
         self.jmax=20
-        self.mydt=0.01
+        self.mydt=0.1
         self.xyz=[0.0, 0.0, -273.92]
         self.t=[0,0,0]
 
