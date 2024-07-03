@@ -3,10 +3,7 @@ import time
 
 import serial
 import serial.tools.list_ports
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QThread, pyqtSignal
-
-from UI import Ui_MainWindow
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 
 class SerialThread(QThread):
@@ -50,7 +47,9 @@ class SerialThread(QThread):
                 self.error_signal.emit(str(e))
 
 
-class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
+class Communication(QObject):
+    recieved_respond = pyqtSignal(str)
+    sent_data = pyqtSignal(str)
     # def __init__(self, port='COM7', baudrate=9600):
     # def __init__(self, parent=None):
     """
@@ -63,14 +62,15 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         time.sleep(0.1)  # Adjust the delay as needed
     """
 
-    def __init__(self, port='COM13', baudrate=38400):
+    def __init__(self, port='COM13', baudrate=9600):
+        super(Communication, self).__init__()
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
         self.serial_thread.start()
         # Adding a small delay to ensure the serial port has time to open
         import time
-        time.sleep(0.1)  # Adjust the delay as needed
+        time.sleep(0.5)  # Adjust the delay as needed
 
     def is_serial_connected(self):
         return self.serial_thread.serial.is_open
@@ -239,11 +239,20 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
             self.open_button.setText("关闭串口")
             print("串口已打开")
 
+    def up_respond(self):
+        self.recieved_respond.emit(self.receive_data)
+        return
+
+    def up_message(self, data):
+        self.sent_data.emit(data)
+        return
+
     def send_data(self, data):
         if self.serial_thread and self.serial_thread.serial.is_open:
             # 将十六进制字符串转换为字节
             data_bytes = bytes.fromhex(data)
             self.serial_thread.serial.write(data_bytes)
+            self.up_message(data)
             print(f"发送数据: {data}")
             # 接收并处理返回的信息
             # response = self.serial_thread.serial.read(2).decode('utf-8')
@@ -263,10 +272,10 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         i = 0
         print(len(packages))
         while i < len(packages) - 1:
-            while flag != 1 and i < len(packages)-1:
+            while flag != 1 and i < len(packages) - 1:
                 protocol = self.write(packages[i])
                 self.send_data(protocol)
-                # time.sleep(0.01)
+                time.sleep(0.01)
                 response = self.receive_data()
                 print(" ".join(hex(byte) for byte in response.encode("utf-8")))
                 if response != "":
@@ -287,7 +296,8 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
                     flag = 1
                     break
             print("Finish sending")
-            return
+        self.send_data("FF 10 FE")
+        return
         """
 
     def send_package(self, packages):
@@ -313,3 +323,6 @@ class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.serial_thread and self.serial_thread.isRunning():
             self.serial_thread.stop()
         super().closeEvent(event)
+
+    def connect(self):
+        pass

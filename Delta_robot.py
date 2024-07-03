@@ -1,31 +1,30 @@
 import math
+
 import numpy as np
+
 
 class DeltaRobotKinematics:
     def __init__(self, static_dia, moving_dia, link_length, length):
         self.static_dia = static_dia
         self.moving_dia = moving_dia
         self.link_length = link_length
-        self.travel_range = (0,length)
+        self.travel_range = (0, length)
         self.base_radius = static_dia / 2  # 静平台半径
         self.top_radius = moving_dia / 2  # 动平台半径
         self.theta = math.radians(120)  # 角度转换为弧度
-        self.vmax=20
-        self.amax=15
-        self.jmax=20
-        self.mydt=0.1
-        self.xyz=[0.0, 0.0, -273.92]
-        self.t=[0,0,0]
-
+        self.vmax = 20
+        self.amax = 15
+        self.jmax = 20
+        self.mydt = 0.1
+        self.xyz = [0.0, 0.0, -273.92]
+        self.t = [0, 0, 0]
 
     def inverse_kinematics(self, t1, t2, t3):
         """逆运动学：根据滑块距离计算动平台中心坐标"""
         # 定义几何参数
         R1 = self.base_radius  # 静平台的外接圆半径
-        R2 = self.top_radius   # 动平台的外接圆半径
+        R2 = self.top_radius  # 动平台的外接圆半径
         R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
-
-
 
         # 定义OB, OC, OD
         OB = np.array([-R * math.cos(30 * math.pi / 180), R * math.sin(30 * math.pi / 180), -t2])
@@ -106,6 +105,7 @@ class DeltaRobotKinematics:
         z = OA[2]
 
         return x, y, z
+
     """
     def calculate_workspace(self,  step=1):
         # 计算工作空间
@@ -122,35 +122,37 @@ class DeltaRobotKinematics:
                         continue
         return np.array(workspace)
     """
+
     def forward_kinematics(self, x, y, z):
         """正运动学：根据动平台中心坐标计算滑块距离"""
         R = self.base_radius - self.top_radius
-        l=  self.link_length
+        l = self.link_length
         t3 = -z - np.sqrt(l ** 2 - x ** 2 - (y + R) ** 2)
         t2 = -z - np.sqrt(l ** 2 - (x - np.sqrt(3) / 2 * R) ** 2 - (R / 2 - y) ** 2)
         t1 = -z - np.sqrt(l ** 2 - (np.sqrt(3) / 2 * R + x) ** 2 - (R / 2 - y) ** 2)
 
         return [t1, t2, t3]
 
-    def point2point(self,x1,y1,z1,x2,y2,z2):
-        P1 = np.array([x1,y1,z1])
-        P2 = np.array([x2,y2,z2])
+    def point2point_ss(self, x1, y1, z1, x2, y2, z2):
+        # 双s
+        P1 = np.array([x1, y1, z1])
+        P2 = np.array([x2, y2, z2])
 
         # 定义几何参数
         R1 = self.base_radius  # 静平台的外接圆半径
         R2 = self.top_radius  # 动平台的外接圆半径
         R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
         l = self.link_length
-        mydt=self.mydt
-        vmax=self.vmax
-        amax=self.amax
-        jmax=self.jmax
+        mydt = self.mydt
+        vmax = self.vmax
+        amax = self.amax
+        jmax = self.jmax
 
-        q1=np.linalg.norm(P2 - P1)
-        q0=0
-        v0=0
-        v1=0
-        count=0
+        q1 = np.linalg.norm(P2 - P1)
+        q0 = 0
+        v0 = 0
+        v1 = 0
+        count = 0
         if (vmax - v0) * jmax < amax ** 2:
             if v0 > vmax:
                 Tj1 = 0
@@ -174,7 +176,6 @@ class DeltaRobotKinematics:
             Td = Tj2 + (vmax - v1) / amax
             alimd = amax
 
-
         Tv = (q1 - q0) / vmax - Ta / 2 * (1 + v0 / vmax) - Td / 2 * (1 + v1 / vmax)
         if Tv <= 0:
             Tv = 0
@@ -188,7 +189,7 @@ class DeltaRobotKinematics:
 
                 # 计算delta
                 delta = (amax ** 4) / (jmax ** 2) + 2 * (v0 ** 2 + v1 ** 2) + amax * (
-                            4 * (q1 - q0) - 2 * amax / jmax * (v0 + v1))
+                        4 * (q1 - q0) - 2 * amax / jmax * (v0 + v1))
 
                 # 更新Tj1, Ta, Tj2, Td
                 Tj1 = amax / jmax
@@ -253,7 +254,7 @@ class DeltaRobotKinematics:
             elif t >= T - Td + Tj2 and t < T - Tj2:
                 # 段6：匀减速度段
                 q = q1 - (vlim + v1) * Td / 2 + vlim * (t - T + Td) - alimd / 6 * (
-                            3 * (t - T + Td) ** 2 - 3 * Tj2 * (t - T + Td) + Tj2 ** 2)
+                        3 * (t - T + Td) ** 2 - 3 * Tj2 * (t - T + Td) + Tj2 ** 2)
                 v = vlim - alimd * (t - T + Td - Tj2 / 2)
                 a = -alimd
                 j = 0
@@ -281,7 +282,7 @@ class DeltaRobotKinematics:
             for i in range(m):
                 x, y, z = points[i]  # 提取每个点的x, y, z坐标
                 # 存储计算结果
-                t_results[i] = self.forward_kinematics(x,y,z)
+                t_results[i] = self.forward_kinematics(x, y, z)
 
             # 显示结果（可选）
             # 初始化位移、速度、加速度和加加速度的数组
@@ -302,8 +303,58 @@ class DeltaRobotKinematics:
             for i in range(3, m - 3):
                 jerk[i] = [(acceleration[i + 1][j] - acceleration[i - 1][j]) / (2 * mydt) for j in range(n)]
 
-
         return points, vc, ac, jerk
+
+    def point2point(self, x1, y1, z1, x2, y2, z2):
+        P1 = np.array([x1, y1, z1])
+        P2 = np.array([x2, y2, z2])
+
+        # 定义几何参数
+        R1 = self.base_radius  # 静平台的外接圆半径
+        R2 = self.top_radius  # 动平台的外接圆半径
+        R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
+        l = self.link_length
+        mydt = self.mydt
+        vmax = self.vmax
+        amax = self.amax
+        jmax = self.jmax
+
+        q1 = np.linalg.norm(P2 - P1)
+        q0 = 0
+        v0 = 0
+        v1 = 0
+        T = math.sqrt(8.135 * q1 / amax)
+
+        # 初始化加速度、速度、位置、时间等数组
+        displacement = []
+        velocity = []
+        acceleration = []
+        jerk = []
+        points = []
+
+        for t in np.arange(0, T + mydt, mydt):
+            # 计算当前时间占总时间的比例
+            tao = t / T
+            # 根据时间比例计算当前位置、速度、加速度和加加速度
+            s = amax / 8.135 * T * T * (20 * tao ** 3 - 45 * tao ** 4 + 36 * tao ** 5 - 10 * tao ** 6)
+            v = amax / 8.135 * T * (60 * tao ** 2 - 180 * tao ** 3 + 180 * tao ** 4 - 60 * tao ** 5)
+            a = amax / 8.135 * (120 * tao - 540 * tao ** 2 + 720 * tao ** 3 - 300 * tao ** 4)
+            j = amax / 8.135 / T * (120 - 1080 * tao + 2160 * tao ** 2 - 1200 * tao ** 3)
+
+            # 将计算结果保存到数组中
+            displacement.append(s)
+            velocity.append(v)
+            acceleration.append(a)
+            jerk.append(j)
+
+            if s <= q1:
+                scal = s / q1
+                p = P1 + (P2 - P1) * scal
+                points.append(p)
+
+        # 将结果转换为 numpy 数组
+
+        return points, velocity, acceleration, jerk
 
     def gate_curve(self):
         # 定义几何参数
@@ -311,10 +362,10 @@ class DeltaRobotKinematics:
         R2 = self.top_radius  # 动平台的外接圆半径
         R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
         l = self.link_length
-        mydt=self.mydt
-        vmax=self.vmax
-        amax=self.amax
-        jmax=self.jmax
+        mydt = self.mydt
+        vmax = self.vmax
+        amax = self.amax
+        jmax = self.jmax
 
         # 门型点
         P1 = np.array([0, -50, -380])  # 第一个门型点的坐标
@@ -425,6 +476,3 @@ class DeltaRobotKinematics:
         jc = svajArr[:, 3].tolist()
 
         return points, vc, ac, jc
-
-
-

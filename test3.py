@@ -286,17 +286,11 @@ class Ui_Widget(object):
         self.pushButton_6.setText(_translate("Widget", "运行"))
         self.pushButton_7.setText(_translate("Widget", "运行"))
         self.pushButton_8.setText(_translate("Widget", "X+"))
-        self.pushButton_8.setCheckable(True)
         self.pushButton_9.setText(_translate("Widget", "X-"))
-        self.pushButton_9.setCheckable(True)
         self.pushButton_10.setText(_translate("Widget", "Y-"))
-        self.pushButton_10.setCheckable(True)
         self.pushButton_11.setText(_translate("Widget", "Y+"))
-        self.pushButton_11.setCheckable(True)
         self.pushButton_12.setText(_translate("Widget", "Z-"))
-        self.pushButton_12.setCheckable(True)
         self.pushButton_13.setText(_translate("Widget", "Z+"))
-        self.pushButton_13.setCheckable(True)
         self.label.setText(_translate("Widget", "串口选择"))
         self.label_2.setText(_translate("Widget", "波特率"))
         self.label_3.setText(_translate("Widget", "串口返回"))
@@ -324,20 +318,3 @@ class Ui_Widget(object):
         self.pushButton_17.setText(_translate("Widget", "+"))
         self.pushButton_18.setText(_translate("Widget", "-"))
         self.pushButton_19.setText(_translate("Widget", "+"))
-
-    def get_curve(self):
-        index=self.comboBox.currentText()
-        return index
-
-    def get_xyz(self):
-        x=self.spinBox.value()
-        y=self.spinBox_2.value()
-        z=self.spinBox_3.value()
-        return x,y,z
-
-    def update_x(self,n):
-        self.textBrowser_6.append(n)
-
-
-
-

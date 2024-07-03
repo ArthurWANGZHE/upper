@@ -1,13 +1,13 @@
 # 定义通信协议，实现串口通信
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit, QLabel, QComboBox, QHBoxLayout)
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from PyQt5 import QtCore, QtGui, QtWidgets
 import serial
 import serial.tools.list_ports
 import struct
 import time
-from UI import Ui_MainWindow
+
 
 
 class SerialThread(QThread):
@@ -51,7 +51,7 @@ class SerialThread(QThread):
                 self.error_signal.emit(str(e))
 
 
-class Communication(QtWidgets.QMainWindow, Ui_MainWindow):
+class Communication(QObject):
     #def __init__(self, port='COM7', baudrate=9600):
     #def __init__(self, parent=None):
     """
