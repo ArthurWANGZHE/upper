@@ -1,9 +1,9 @@
 # 定义通信协议，实现串口通信
-import time
+
 
 import serial
 import serial.tools.list_ports
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, QTime, QTimer
 
 
 class SerialThread(QThread):
@@ -50,27 +50,25 @@ class SerialThread(QThread):
 class Communication(QObject):
     recieved_respond = pyqtSignal(str)
     sent_data = pyqtSignal(str)
-    # def __init__(self, port='COM7', baudrate=9600):
-    # def __init__(self, parent=None):
-    """
-        self.serial_thread = SerialThread(port, baudrate)
-        self.serial_thread.received_data.connect(self.receive_data)
-        self.serial_thread.error_signal.connect(self.handle_error)
-        self.serial_thread.start()
-        # Adding a small delay to ensure the serial port has time to open
-        import time
-        time.sleep(0.1)  # Adjust the delay as needed
-    """
 
-    def __init__(self, port='COM13', baudrate=9600):
+    def __init__(self, port='COM4', baudrate=9600):
         super(Communication, self).__init__()
         self.serial_thread = SerialThread(port, baudrate)
         self.serial_thread.received_data.connect(self.receive_data)
         self.serial_thread.error_signal.connect(self.handle_error)
         self.serial_thread.start()
-        # Adding a small delay to ensure the serial port has time to open
-        import time
-        time.sleep(0.5)  # Adjust the delay as needed
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.on_timeout)
+
+        self.start_timer()
+
+    def start_timer(self):
+        # 设置定时器为单次触发，并设置间隔为1000毫秒（1秒）
+        self.timer.setSingleShot(True)
+        self.timer.start(10)
+
+    def on_timeout(self):
+        return
 
     def is_serial_connected(self):
         return self.serial_thread.serial.is_open
@@ -89,24 +87,6 @@ class Communication(QObject):
 
         hex_result = hex_num.zfill(4)
 
-        """
-        # 把16进制转换成2进制
-        bin_num = bin(int(hex_num, 16))
-
-        # 取二进制反码
-        bin_num_inverse = ''.join('1' if bit == '0' else '0' for bit in bin_num[2:])
-
-        # 如果是负数，采用2进制补码
-        if is_negative:
-            # 找到最高位的1，然后取反
-            index_of_first_one = bin_num_inverse.find('1')
-            bin_num_complement = bin_num_inverse[:index_of_first_one] + bin_num[2:][index_of_first_one:]
-        else:
-            bin_num_complement = bin_num_inverse
-
-        # 把这个2进制转化为16进制
-        hex_result = hex(int(bin_num_complement, 2))[2:].zfill(4)
-        """
 
         return hex_result
 
@@ -226,12 +206,9 @@ class Communication(QObject):
 
     def open_serial(self):
         if self.serial_thread and self.serial_thread.isRunning():
-            self.serial_thread.stop()
-            self.open_button.setText("打开串口")
-            print("串口已关闭")
-        else:
-            port = self.port_combo.currentText()
-            baudrate = int(self.baudrate_combo.currentText())
+
+            port ="COM14"
+            baudrate = 9600
             self.serial_thread = SerialThread(port, baudrate)
             self.serial_thread.received_data.connect(self.receive_data)
             self.serial_thread.error_signal.connect(self.handle_error)
@@ -275,7 +252,7 @@ class Communication(QObject):
             while flag != 1 and i < len(packages) - 1:
                 protocol = self.write(packages[i])
                 self.send_data(protocol)
-                time.sleep(0.01)
+                self.start_timer()
                 response = self.receive_data()
                 print(" ".join(hex(byte) for byte in response.encode("utf-8")))
                 if response != "":
@@ -288,7 +265,7 @@ class Communication(QObject):
                     break
             while flag == 1:
                 print("no data")
-                time.sleep(0.01)
+                self.start_timer()
                 response = self.receive_data()
                 if response != "":
                     flag = 0
@@ -296,28 +273,14 @@ class Communication(QObject):
                     flag = 1
                     break
             print("Finish sending")
-        self.send_data("FF 10 FE")
-        return
-        """
+        self.send_data("FF 40 FE")
 
-    def send_package(self, packages):
-        i = 0
-        print(len(packages))
-        while i < len(packages):
-            protocol = self.write(packages[i])
-            self.send_data(protocol)
-            response = self.receive_data()
-            print(response)
-            if response != "":
-                i += 1
-            else:
-                print("no data")
-        print("Finish sending")
-        """
+        return
+
 
     def handle_error(self, error_message):
         print(f"发生错误: {error_message}")
-        self.receive_area.insertPlainText(f"\n错误: {error_message}\n")
+        #self.receive_area.insertPlainText(f"\n错误: {error_message}\n")
 
     def closeEvent(self, event):
         if self.serial_thread and self.serial_thread.isRunning():

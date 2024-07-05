@@ -10,13 +10,15 @@
 
 from PyQt5 import QtCore, QtWidgets
 
+from upper.worker_thread import WorkerThread
+
 
 class Ui_Widget(object):
     def setupUi(self, Widget):
         Widget.setObjectName("Widget")
-        Widget.resize(952, 459)
+        Widget.resize(952, 512)
         self.com = QtWidgets.QComboBox(Widget)
-        self.com.setGeometry(QtCore.QRect(80, 50, 72, 22))
+        self.com.setGeometry(QtCore.QRect(40, 50, 101, 22))
         self.com.setObjectName("com")
         self.com.addItem("")
         self.com.addItem("")
@@ -39,7 +41,7 @@ class Ui_Widget(object):
         self.com.addItem("")
         self.com.addItem("")
         self.botrate = QtWidgets.QComboBox(Widget)
-        self.botrate.setGeometry(QtCore.QRect(170, 50, 72, 22))
+        self.botrate.setGeometry(QtCore.QRect(170, 51, 101, 21))
         self.botrate.setObjectName("botrate")
         self.botrate.addItem("")
         self.botrate.addItem("")
@@ -53,21 +55,21 @@ class Ui_Widget(object):
         self.botrate.addItem("")
         self.botrate.setItemText(9, "")
         self.pushButton = QtWidgets.QPushButton(Widget)
-        self.pushButton.setGeometry(QtCore.QRect(260, 50, 80, 20))
+        self.pushButton.setGeometry(QtCore.QRect(300, 50, 91, 21))
         self.pushButton.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.pushButton.setObjectName("pushButton")
-        self.cameraview = QtWidgets.QGraphicsView(Widget)
-        self.cameraview.setGeometry(QtCore.QRect(80, 240, 251, 171))
+        self.cameraview = QtWidgets.QLabel(Widget)
+        self.cameraview.setGeometry(QtCore.QRect(40, 280, 291, 201))
         self.cameraview.setObjectName("cameraview")
         self.textBrowser = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser.setGeometry(QtCore.QRect(80, 170, 256, 41))
+        self.textBrowser.setGeometry(QtCore.QRect(40, 190, 291, 41))
         self.textBrowser.setObjectName("textBrowser")
         self.pushButton_2 = QtWidgets.QPushButton(Widget)
-        self.pushButton_2.setGeometry(QtCore.QRect(790, 40, 71, 51))
+        self.pushButton_2.setGeometry(QtCore.QRect(830, 40, 71, 51))
         self.pushButton_2.setStyleSheet("background-color: rgb(255, 0, 0);")
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_3 = QtWidgets.QPushButton(Widget)
-        self.pushButton_3.setGeometry(QtCore.QRect(660, 40, 71, 51))
+        self.pushButton_3.setGeometry(QtCore.QRect(700, 40, 71, 51))
         self.pushButton_3.setStyleSheet("background-color: rgb(85, 170, 0);")
         self.pushButton_3.setObjectName("pushButton_3")
         self.pushButton_4 = QtWidgets.QPushButton(Widget)
@@ -75,176 +77,301 @@ class Ui_Widget(object):
         self.pushButton_4.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.pushButton_4.setObjectName("pushButton_4")
         self.pushButton_5 = QtWidgets.QPushButton(Widget)
-        self.pushButton_5.setGeometry(QtCore.QRect(540, 100, 80, 20))
+        self.pushButton_5.setGeometry(QtCore.QRect(520, 100, 80, 20))
         self.pushButton_5.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.pushButton_5.setObjectName("pushButton_5")
         self.comboBox = QtWidgets.QComboBox(Widget)
-        self.comboBox.setGeometry(QtCore.QRect(390, 170, 81, 22))
+        self.comboBox.setGeometry(QtCore.QRect(370, 170, 121, 31))
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.pushButton_6 = QtWidgets.QPushButton(Widget)
-        self.pushButton_6.setGeometry(QtCore.QRect(540, 170, 80, 20))
+        self.pushButton_6.setGeometry(QtCore.QRect(520, 170, 80, 20))
         self.pushButton_6.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.pushButton_6.setObjectName("pushButton_6")
         self.pushButton_7 = QtWidgets.QPushButton(Widget)
-        self.pushButton_7.setGeometry(QtCore.QRect(540, 220, 81, 21))
+        self.pushButton_7.setGeometry(QtCore.QRect(520, 220, 81, 21))
         self.pushButton_7.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.pushButton_7.setObjectName("pushButton_7")
         self.pushButton_8 = QtWidgets.QPushButton(Widget)
-        self.pushButton_8.setGeometry(QtCore.QRect(420, 300, 31, 31))
+        self.pushButton_8.setGeometry(QtCore.QRect(410, 310, 51, 41))
         self.pushButton_8.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_8.setObjectName("pushButton_8")
         self.pushButton_9 = QtWidgets.QPushButton(Widget)
-        self.pushButton_9.setGeometry(QtCore.QRect(420, 360, 31, 31))
+        self.pushButton_9.setGeometry(QtCore.QRect(410, 410, 51, 41))
         self.pushButton_9.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_9.setObjectName("pushButton_9")
         self.pushButton_10 = QtWidgets.QPushButton(Widget)
-        self.pushButton_10.setGeometry(QtCore.QRect(380, 330, 31, 31))
+        self.pushButton_10.setGeometry(QtCore.QRect(350, 360, 51, 41))
         self.pushButton_10.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_10.setObjectName("pushButton_10")
         self.pushButton_11 = QtWidgets.QPushButton(Widget)
-        self.pushButton_11.setGeometry(QtCore.QRect(460, 330, 31, 31))
+        self.pushButton_11.setGeometry(QtCore.QRect(470, 360, 51, 41))
         self.pushButton_11.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_11.setObjectName("pushButton_11")
         self.pushButton_12 = QtWidgets.QPushButton(Widget)
-        self.pushButton_12.setGeometry(QtCore.QRect(520, 360, 31, 31))
+        self.pushButton_12.setGeometry(QtCore.QRect(540, 410, 51, 41))
         self.pushButton_12.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_12.setObjectName("pushButton_12")
         self.pushButton_13 = QtWidgets.QPushButton(Widget)
-        self.pushButton_13.setGeometry(QtCore.QRect(520, 300, 31, 31))
+        self.pushButton_13.setGeometry(QtCore.QRect(540, 320, 51, 41))
         self.pushButton_13.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_13.setObjectName("pushButton_13")
         self.label = QtWidgets.QLabel(Widget)
-        self.label.setGeometry(QtCore.QRect(80, 30, 54, 12))
+        self.label.setGeometry(QtCore.QRect(40, 11, 101, 31))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(Widget)
-        self.label_2.setGeometry(QtCore.QRect(170, 30, 54, 12))
+        self.label_2.setGeometry(QtCore.QRect(170, 20, 71, 21))
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(Widget)
-        self.label_3.setGeometry(QtCore.QRect(80, 150, 54, 12))
+        self.label_3.setGeometry(QtCore.QRect(40, 160, 81, 21))
         self.label_3.setObjectName("label_3")
         self.label_4 = QtWidgets.QLabel(Widget)
-        self.label_4.setGeometry(QtCore.QRect(80, 220, 71, 16))
+        self.label_4.setGeometry(QtCore.QRect(40, 240, 91, 31))
         self.label_4.setObjectName("label_4")
         self.label_5 = QtWidgets.QLabel(Widget)
-        self.label_5.setGeometry(QtCore.QRect(390, 70, 54, 12))
+        self.label_5.setGeometry(QtCore.QRect(430, 40, 91, 41))
         self.label_5.setObjectName("label_5")
         self.label_6 = QtWidgets.QLabel(Widget)
-        self.label_6.setGeometry(QtCore.QRect(390, 140, 54, 12))
+        self.label_6.setGeometry(QtCore.QRect(430, 130, 81, 31))
         self.label_6.setObjectName("label_6")
         self.label_7 = QtWidgets.QLabel(Widget)
-        self.label_7.setGeometry(QtCore.QRect(390, 220, 61, 16))
+        self.label_7.setGeometry(QtCore.QRect(430, 210, 81, 41))
         self.label_7.setObjectName("label_7")
         self.spinBox = QtWidgets.QSpinBox(Widget)
-        self.spinBox.setGeometry(QtCore.QRect(410, 260, 41, 22))
+        self.spinBox.setGeometry(QtCore.QRect(370, 261, 51, 31))
         self.spinBox.setObjectName("spinBox")
         self.spinBox_2 = QtWidgets.QSpinBox(Widget)
-        self.spinBox_2.setGeometry(QtCore.QRect(470, 260, 42, 22))
+        self.spinBox_2.setGeometry(QtCore.QRect(450, 261, 51, 31))
         self.spinBox_2.setObjectName("spinBox_2")
         self.spinBox_3 = QtWidgets.QSpinBox(Widget)
-        self.spinBox_3.setGeometry(QtCore.QRect(530, 260, 42, 22))
+        self.spinBox_3.setGeometry(QtCore.QRect(530, 260, 51, 31))
         self.spinBox_3.setObjectName("spinBox_3")
         self.label_8 = QtWidgets.QLabel(Widget)
-        self.label_8.setGeometry(QtCore.QRect(80, 80, 54, 12))
+        self.label_8.setGeometry(QtCore.QRect(40, 80, 71, 21))
         self.label_8.setObjectName("label_8")
         self.textBrowser_2 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_2.setGeometry(QtCore.QRect(80, 100, 256, 41))
+        self.textBrowser_2.setGeometry(QtCore.QRect(35, 110, 301, 41))
         self.textBrowser_2.setObjectName("textBrowser_2")
         self.v = QtWidgets.QSlider(Widget)
-        self.v.setGeometry(QtCore.QRect(600, 320, 16, 81))
+        self.v.setGeometry(QtCore.QRect(650, 320, 16, 81))
         self.v.setOrientation(QtCore.Qt.Vertical)
         self.v.setObjectName("v")
         self.label_9 = QtWidgets.QLabel(Widget)
-        self.label_9.setGeometry(QtCore.QRect(670, 110, 54, 12))
+        self.label_9.setGeometry(QtCore.QRect(620, 90, 81, 41))
         self.label_9.setObjectName("label_9")
         self.textBrowser_3 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_3.setGeometry(QtCore.QRect(660, 150, 51, 31))
+        self.textBrowser_3.setGeometry(QtCore.QRect(700, 150, 51, 31))
         self.textBrowser_3.setObjectName("textBrowser_3")
         self.textBrowser_4 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_4.setGeometry(QtCore.QRect(740, 150, 51, 31))
+        self.textBrowser_4.setGeometry(QtCore.QRect(780, 150, 51, 31))
         self.textBrowser_4.setObjectName("textBrowser_4")
         self.textBrowser_5 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_5.setGeometry(QtCore.QRect(820, 150, 51, 31))
+        self.textBrowser_5.setGeometry(QtCore.QRect(860, 150, 51, 31))
         self.textBrowser_5.setObjectName("textBrowser_5")
         self.label_10 = QtWidgets.QLabel(Widget)
-        self.label_10.setGeometry(QtCore.QRect(670, 130, 54, 12))
+        self.label_10.setGeometry(QtCore.QRect(703, 120, 61, 20))
         self.label_10.setObjectName("label_10")
         self.label_11 = QtWidgets.QLabel(Widget)
-        self.label_11.setGeometry(QtCore.QRect(830, 130, 54, 12))
+        self.label_11.setGeometry(QtCore.QRect(863, 120, 61, 20))
         self.label_11.setObjectName("label_11")
         self.label_12 = QtWidgets.QLabel(Widget)
-        self.label_12.setGeometry(QtCore.QRect(750, 130, 54, 12))
+        self.label_12.setGeometry(QtCore.QRect(783, 120, 61, 20))
         self.label_12.setObjectName("label_12")
         self.label_13 = QtWidgets.QLabel(Widget)
-        self.label_13.setGeometry(QtCore.QRect(670, 200, 81, 16))
+        self.label_13.setGeometry(QtCore.QRect(620, 190, 111, 31))
         self.label_13.setObjectName("label_13")
         self.label_14 = QtWidgets.QLabel(Widget)
-        self.label_14.setGeometry(QtCore.QRect(670, 220, 54, 12))
+        self.label_14.setGeometry(QtCore.QRect(710, 210, 61, 31))
         self.label_14.setObjectName("label_14")
         self.label_15 = QtWidgets.QLabel(Widget)
-        self.label_15.setGeometry(QtCore.QRect(830, 220, 54, 12))
+        self.label_15.setGeometry(QtCore.QRect(870, 210, 61, 31))
         self.label_15.setObjectName("label_15")
         self.label_16 = QtWidgets.QLabel(Widget)
-        self.label_16.setGeometry(QtCore.QRect(750, 220, 54, 12))
+        self.label_16.setGeometry(QtCore.QRect(790, 210, 61, 31))
         self.label_16.setObjectName("label_16")
         self.textBrowser_6 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_6.setGeometry(QtCore.QRect(660, 240, 51, 31))
+        self.textBrowser_6.setGeometry(QtCore.QRect(700, 250, 51, 31))
         self.textBrowser_6.setObjectName("textBrowser_6")
         self.textBrowser_7 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_7.setGeometry(QtCore.QRect(740, 240, 51, 31))
+        self.textBrowser_7.setGeometry(QtCore.QRect(780, 250, 51, 31))
         self.textBrowser_7.setObjectName("textBrowser_7")
         self.textBrowser_8 = QtWidgets.QTextBrowser(Widget)
-        self.textBrowser_8.setGeometry(QtCore.QRect(820, 240, 51, 31))
+        self.textBrowser_8.setGeometry(QtCore.QRect(860, 250, 51, 31))
         self.textBrowser_8.setObjectName("textBrowser_8")
         self.label_17 = QtWidgets.QLabel(Widget)
-        self.label_17.setGeometry(QtCore.QRect(670, 290, 54, 12))
+        self.label_17.setGeometry(QtCore.QRect(710, 289, 81, 41))
         self.label_17.setObjectName("label_17")
         self.label_18 = QtWidgets.QLabel(Widget)
-        self.label_18.setGeometry(QtCore.QRect(670, 310, 54, 12))
+        self.label_18.setGeometry(QtCore.QRect(710, 319, 71, 41))
         self.label_18.setObjectName("label_18")
         self.label_19 = QtWidgets.QLabel(Widget)
-        self.label_19.setGeometry(QtCore.QRect(750, 310, 54, 12))
+        self.label_19.setGeometry(QtCore.QRect(790, 319, 61, 41))
         self.label_19.setObjectName("label_19")
         self.label_20 = QtWidgets.QLabel(Widget)
-        self.label_20.setGeometry(QtCore.QRect(830, 310, 54, 12))
+        self.label_20.setGeometry(QtCore.QRect(870, 319, 61, 41))
         self.label_20.setObjectName("label_20")
         self.label_21 = QtWidgets.QLabel(Widget)
-        self.label_21.setGeometry(QtCore.QRect(580, 290, 54, 12))
+        self.label_21.setGeometry(QtCore.QRect(630, 280, 61, 31))
         self.label_21.setObjectName("label_21")
         self.pushButton_14 = QtWidgets.QPushButton(Widget)
-        self.pushButton_14.setGeometry(QtCore.QRect(670, 330, 31, 31))
+        self.pushButton_14.setGeometry(QtCore.QRect(710, 370, 31, 31))
         self.pushButton_14.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_14.setObjectName("pushButton_14")
         self.pushButton_15 = QtWidgets.QPushButton(Widget)
-        self.pushButton_15.setGeometry(QtCore.QRect(670, 370, 31, 31))
+        self.pushButton_15.setGeometry(QtCore.QRect(710, 420, 31, 31))
         self.pushButton_15.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_15.setObjectName("pushButton_15")
         self.pushButton_16 = QtWidgets.QPushButton(Widget)
-        self.pushButton_16.setGeometry(QtCore.QRect(750, 370, 31, 31))
+        self.pushButton_16.setGeometry(QtCore.QRect(790, 420, 31, 31))
         self.pushButton_16.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_16.setObjectName("pushButton_16")
         self.pushButton_17 = QtWidgets.QPushButton(Widget)
-        self.pushButton_17.setGeometry(QtCore.QRect(750, 330, 31, 31))
+        self.pushButton_17.setGeometry(QtCore.QRect(790, 370, 31, 31))
         self.pushButton_17.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_17.setObjectName("pushButton_17")
         self.pushButton_18 = QtWidgets.QPushButton(Widget)
-        self.pushButton_18.setGeometry(QtCore.QRect(830, 370, 31, 31))
+        self.pushButton_18.setGeometry(QtCore.QRect(870, 420, 31, 31))
         self.pushButton_18.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_18.setObjectName("pushButton_18")
         self.pushButton_19 = QtWidgets.QPushButton(Widget)
-        self.pushButton_19.setGeometry(QtCore.QRect(830, 330, 31, 31))
+        self.pushButton_19.setGeometry(QtCore.QRect(870, 370, 31, 31))
         self.pushButton_19.setStyleSheet("background-color: rgb(170, 255, 255);")
         self.pushButton_19.setObjectName("pushButton_19")
 
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 
+
+
+
+
+
+
+
+
+        self.pushButton.clicked.connect(lambda: self.connect())
+        self.pushButton_2.clicked.connect(lambda: self.stop())
+        self.pushButton_3.pressed.connect(lambda: self.back())
+        self.pushButton_4.pressed.connect(lambda: self.classify())
+        self.pushButton_5.pressed.connect(lambda: self.pick())
+        self.pushButton_6.pressed.connect(lambda: self.run_curve())
+        self.pushButton_7.pressed.connect(
+            lambda: self.point2point())
+
+        self.pushButton_5.pressed.connect(lambda :self.point)
+
+        self.pushButton_8.pressed.connect(lambda: self.x_up())
+        self.pushButton_9.pressed.connect(lambda: self.x_down())
+        self.pushButton_10.pressed.connect(lambda: self.y_up())
+        self.pushButton_11.pressed.connect(lambda: self.y_down())
+        self.pushButton_12.pressed.connect(lambda: self.z_up())
+        self.pushButton_13.pressed.connect(lambda: self.z_down())
+        self.pushButton_14.pressed.connect(lambda: self.a_up())
+        self.pushButton_15.pressed.connect(lambda: self.a_down())
+        self.pushButton_16.pressed.connect(lambda: self.b_down())
+        self.pushButton_17.pressed.connect(lambda: self.b_up())
+        self.pushButton_18.pressed.connect(lambda: self.c_down())
+        self.pushButton_19.pressed.connect(lambda: self.c_up())
+
+        self.retranslateUi(Widget)
+        QtCore.QMetaObject.connectSlotsByName(Widget)
+
+    def stop(self):
+        pass
+    def classify(self):
+        pass
+
+    def pick(self):
+        pass
+
+    def run_curve(self):
+        index=self.get_curve()
+        thread=WorkerThread("run_curve",index)
+        thread.start()
+
+    def point2point(self):
+        x2 = self.get_x(),
+        y2 = self.get_y(),
+        z2 = self.get_z()
+        thread=WorkerThread("point2point",x2,y2,z2)
+        thread.start()
+
+    def point(self):
+        x2 = self.
+        y2 = self.
+        z2 = self.
+        thread = WorkerThread("point2point", x2, y2, z2)
+        thread.start()
+
+
+    def connect(self):
+        thread=WorkerThread("open_serial")
+        thread.start()
+
+    def stop(self):
+        thread=WorkerThread("stop")
+        thread.start()
+
+    def back(self):
+        thread=WorkerThread("back")
+        thread.start()
+
+    def x_up(self):
+        thread=WorkerThread("x_up")
+        thread.start()
+
+    def x_down(self):
+        thread=WorkerThread("x_down")
+        thread.start()
+
+    def y_up(self):
+        thread=WorkerThread("y_up")
+        thread.start()
+
+    def y_down(self):
+        thread=WorkerThread("y_down")
+        thread.start()
+
+    def z_up(self):
+        thread=WorkerThread("z_up")
+        thread.start()
+
+    def z_down(self):
+        thread=WorkerThread("z_down")
+        thread.start()
+
+    def a_up(self):
+        thread=WorkerThread('a_up')
+        thread.start()
+
+    def a_down(self):
+        thread=WorkerThread('a_down')
+        thread.start()
+
+    def b_up(self):
+        thread=WorkerThread('b_up')
+        thread.start()
+
+    def b_down(self):
+        thread=WorkerThread('b_down')
+        thread.start()
+
+    def c_up(self):
+        thread=WorkerThread("c_up")
+        thread.start()
+
+    def c_down(self):
+        thread=WorkerThread("c_down")
+        thread.start()
+
+
+
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
-        Widget.setWindowTitle(_translate("Widget", "Delta机器人操作终端"))
+        Widget.setWindowTitle(_translate("Widget", "Widget"))
         self.com.setItemText(0, _translate("Widget", "COM1"))
         self.com.setItemText(1, _translate("Widget", "COM2"))
         self.com.setItemText(2, _translate("Widget", "COM3"))
@@ -286,17 +413,11 @@ class Ui_Widget(object):
         self.pushButton_6.setText(_translate("Widget", "运行"))
         self.pushButton_7.setText(_translate("Widget", "运行"))
         self.pushButton_8.setText(_translate("Widget", "X+"))
-        self.pushButton_8.setCheckable(True)
         self.pushButton_9.setText(_translate("Widget", "X-"))
-        self.pushButton_9.setCheckable(True)
         self.pushButton_10.setText(_translate("Widget", "Y-"))
-        self.pushButton_10.setCheckable(True)
         self.pushButton_11.setText(_translate("Widget", "Y+"))
-        self.pushButton_11.setCheckable(True)
         self.pushButton_12.setText(_translate("Widget", "Z-"))
-        self.pushButton_12.setCheckable(True)
         self.pushButton_13.setText(_translate("Widget", "Z+"))
-        self.pushButton_13.setCheckable(True)
         self.label.setText(_translate("Widget", "串口选择"))
         self.label_2.setText(_translate("Widget", "波特率"))
         self.label_3.setText(_translate("Widget", "串口返回"))
@@ -317,7 +438,7 @@ class Ui_Widget(object):
         self.label_18.setText(_translate("Widget", "电机A"))
         self.label_19.setText(_translate("Widget", "电机B"))
         self.label_20.setText(_translate("Widget", "电机C"))
-        self.label_21.setText(_translate("Widget", "速度调节"))
+        self.label_21.setText(_translate("Widget", "速度"))
         self.pushButton_14.setText(_translate("Widget", "+"))
         self.pushButton_15.setText(_translate("Widget", "-"))
         self.pushButton_16.setText(_translate("Widget", "-"))
@@ -325,18 +446,77 @@ class Ui_Widget(object):
         self.pushButton_18.setText(_translate("Widget", "-"))
         self.pushButton_19.setText(_translate("Widget", "+"))
 
+
+
+
+    def connect_signal(self):
+        WorkerThread.xxx.connect(self.xx)
+        WorkerThread.yyy.connect(self.yy)
+        WorkerThread.zzz.connect(self.zz)
+        WorkerThread.t11.connect(self.t1)
+        WorkerThread.t22.connect(self.t2)
+        WorkerThread.t33.connect(self.t3)
+        WorkerThread.message.connect(self.message)
+        WorkerThread.respond.connect(self.respond)
+    def xx(self, message):
+        self.textBrowser_6.append(message)
+
+
+    def yy(self, message):
+        self.textBrowser_7.append(message)
+
+
+    def zz(self, message):
+        self.textBrowser_8.append(message)
+
+
+    def t1(self, message):
+        self.textBrowser_3.append(message)
+
+
+    def t2(self, message):
+        self.textBrowser_4.append(message)
+
+
+    def t3(self, message):
+        self.textBrowser_5.append(message)
+
+
+    def respond(self, message):
+        self.textBrowser.append(message)
+
+
+    def message(self, message):
+        self.textBrowser_2.append(message)
+
+
+
+
     def get_curve(self):
-        index=self.comboBox.currentText()
-        return index
+            index=self.comboBox.currentText()
 
-    def get_xyz(self):
+            return index
+
+    def get_x(self):
         x=self.spinBox.value()
-        y=self.spinBox_2.value()
-        z=self.spinBox_3.value()
-        return x,y,z
+        x=float(x)
 
-    def update_x(self,n):
-        self.textBrowser_6.append(n)
+        return x
+
+    def get_y(self):
+        y=self.spinBox_2.value()
+        y=float(y)
+
+        return y
+
+    def get_z(self):
+        z=self.spinBox_3.value()
+        z=float(z)
+        return z
+
+
+
+
 
 
 

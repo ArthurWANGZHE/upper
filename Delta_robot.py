@@ -1,5 +1,7 @@
 import math
-
+import numpy as np
+from scipy.interpolate import CubicSpline
+from scipy.integrate import cumtrapz
 import numpy as np
 
 
@@ -106,22 +108,6 @@ class DeltaRobotKinematics:
 
         return x, y, z
 
-    """
-    def calculate_workspace(self,  step=1):
-        # 计算工作空间
-        t1_range, t2_range, t3_range=self.travel_range,self.travel_range,self.travel_range
-        workspace = []
-        for t1 in np.arange(t1_range[0], t1_range[1], step):
-            for t2 in np.arange(t2_range[0], t2_range[1], step):
-                for t3 in np.arange(t3_range[0], t3_range[1], step):
-                    try:
-                        x, y, z = self.inverse_kinematics(t1, t2, t3)
-                        workspace.append((x, y, z))
-                    except Exception as e:
-                        # 如果计算过程中出现错误，跳过这个点
-                        continue
-        return np.array(workspace)
-    """
 
     def forward_kinematics(self, x, y, z):
         """正运动学：根据动平台中心坐标计算滑块距离"""
@@ -306,7 +292,7 @@ class DeltaRobotKinematics:
         return points, vc, ac, jerk
 
     def point2point(self, x1, y1, z1, x2, y2, z2):
-        P1 = np.array([x1, y1, z1])
+        P1 = np.array([float(x1), float(y1), float(z1)])
         P2 = np.array([x2, y2, z2])
 
         # 定义几何参数
@@ -476,3 +462,101 @@ class DeltaRobotKinematics:
         jc = svajArr[:, 3].tolist()
 
         return points, vc, ac, jc
+
+    def flower(self):
+
+        # 定义几何参数
+        R1 = self.base_radius  # 静平台的外接圆半径
+        R2 = self.top_radius  # 动平台的外接圆半径
+        R = R1 - R2  # 三角锥法后移动到一点后的向xoy投影的三角形的半径
+        l = self.link_length
+        mydt = self.mydt
+        vmax = self.vmax
+        amax = self.amax
+        jmax = self.jmax
+
+
+        q0 = 0
+        v0 = 0
+        v1 = 0
+
+        TT = 100
+        bb = np.linspace(0, 2 * np.pi, TT)  # 生成从0到2π的点
+        n = 5  # 花瓣的数量
+        RR = 25
+        r = RR + RR / 2 * np.cos(n * bb)  # 半径方程，控制花瓣的形状
+
+        x = r * np.cos(bb)  # 计算x坐标
+        y = r * np.sin(bb)  # 计算y坐标
+        z = -380 * np.ones(TT)  # 将z坐标设为常数
+
+        # 创建点坐标数组
+        p = np.column_stack((x, y, z))
+
+        # 选择特定点作为控制点
+        indices = np.round(np.linspace(0, len(bb) - 1, TT)).astype(int)
+        cpts = p[indices, :]
+
+        # 计算每段的长度和总长度
+        ds = np.sqrt(np.diff(x) ** 2 + np.diff(y) ** 2 + np.diff(z) ** 2)
+        total_length = np.sum(ds)
+
+        # 时间参数
+        tpts = [0, TT * mydt]
+        tvec = np.arange(0, TT * mydt + mydt, mydt)
+
+        # 生成B样条轨迹
+        # 注意：这里需要一个 bsplinepolytraj 函数的替代，SciPy 中没有直接的函数
+        # 这里使用 CubicSpline 作为示例，但可能需要调整以匹配原始 MATLAB 函数的行为
+        cs = CubicSpline(tvec, cpts.T, bc_type='periodic')
+        q = cs(np.linspace(tvec[0], tvec[-1], int(TT * mydt / mydt + 1)).T)
+
+        # 计算控制点之间的总距离和
+        total_distance = np.sum(np.sqrt(np.sum(np.diff(q, axis=1) ** 2, axis=0)))
+
+        # 计算运动总时间
+        T = ((total_distance / amax) ** 0.5) * (8.135) ** 0.5
+
+        # 初始化数组
+        svajArr = np.zeros((int(T / mydt), 5))  # s, v, a, j
+        tArr = np.arange(0, T, mydt)
+        pArr = np.zeros((int(T / mydt), 3))
+
+        # 计算运动参数
+        for i, t in enumerate(tArr):
+            tao = t / T
+            s = amax / 8.135 * T ** 2 * (20 * tao ** 3 - 45 * tao ** 4 + 36 * tao ** 5 - 10 * tao ** 6)
+            v = amax / 8.135 * T * (60 * tao ** 2 - 180 * tao ** 3 + 180 * tao ** 4 - 60 * tao ** 5)
+            a = amax / 8.135 * (120 * tao - 540 * tao ** 2 + 720 * tao ** 3 - 300 * tao ** 4)
+            j = amax / 8.135 / T * (120 - 1080 * tao + 2160 * tao ** 2 - 1200 * tao ** 3)
+            svajArr[i, :] = [s, v, a, j]
+            pArr[i, :] = q[:, i]
+
+        # 插值轨迹点
+        p = cs(tArr).T
+
+        # 计算 t1, t2, t3
+        for i in range(p.shape[0]):
+            x, y, z = p[i, :]
+            t3 = -z - np.sqrt(l ** 2 - x ** 2 - (y + R) ** 2)
+            t2 = -z - np.sqrt(l ** 2 - (x - np.sqrt(3) / 2 * R) ** 2 - (R / 2 - y) ** 2)
+            t1 = -z - np.sqrt(l ** 2 - (np.sqrt(3) / 2 * R + x) ** 2 - (R / 2 - y) ** 2)
+            pArr[i, :] = [t1, t2, t3]
+
+        # 计算速度、加速度、加加速度
+        velocity = np.diff(pArr, axis=0) / mydt
+        acceleration = np.diff(velocity, axis=0) / mydt
+        jerk = np.diff(acceleration, axis=0) / mydt
+
+        # 填充首尾使得尺寸匹配
+        velocity = np.vstack((velocity, np.zeros((1, 3))))
+        acceleration = np.vstack((acceleration, np.zeros((1, 3))))
+        jerk = np.vstack((jerk, np.zeros((1, 3))))
+
+        points = pArr.tolist()  # 将点坐标数组转换为列表
+        velocity = velocity.tolist()  # 速度数组转换为列表
+        acceleration = acceleration.tolist()  # 加速度数组转换为列表
+        jerk = jerk.tolist()  # 加加速度数组转换为列表
+
+        return points, velocity, acceleration, jerk
+
