@@ -6,8 +6,8 @@ import cv2
 import time
 
 # 加载模板图像，可以是彩色的
-template1 = cv2.imread('yellow.png')
-template2 = cv2.imread('red.png')
+template1 = cv2.imread('resources/images/yellow.png')
+template2 = cv2.imread('resources/images/red.png')
 
 # 转换为灰度图像
 template1 = cv2.cvtColor(template1, cv2.COLOR_BGR2GRAY)
@@ -39,8 +39,8 @@ class Camera(QObject):
         self.cap.open(self.camera_num)
         self.timer.start()
         # 加载模板图像，可以是彩色的
-        template1 = cv2.imread('yellow.png')
-        template2 = cv2.imread('red.png')
+        template1 = cv2.imread('resources/images/yellow.png')
+        template2 = cv2.imread('resources/images/red.png')
 
         # 转换为灰度图像
         self.template1 = cv2.cvtColor(template1, cv2.COLOR_BGR2GRAY)

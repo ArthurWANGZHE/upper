@@ -10,7 +10,7 @@
 
 from PyQt5 import QtCore, QtWidgets
 
-from upper.worker_thread import WorkerThread
+from src.utils.worker_thread import WorkerThread
 
 
 class Ui_Widget(object):

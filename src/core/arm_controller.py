@@ -1,8 +1,8 @@
 # 实现点动、寸动以及急停
 from PyQt5.QtCore import QObject, pyqtSignal, QThread, QTimer
 
-from Delta_robot import DeltaRobotKinematics
-from communication import Communication
+from src.core.Delta_robot import DeltaRobotKinematics
+from src.communication.communication import Communication
 
 
 

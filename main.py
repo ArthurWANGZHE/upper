@@ -1,13 +1,14 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QSize
 from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
-from UI import Ui_Widget
-from arm_controller import ArmController
-from camera import Camera
 import sys
-from camera import *
+
+# 导入自定义模块
+from src.ui.UI import Ui_Widget
+from src.core.arm_controller import ArmController
+from src.vision.camera import Camera
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):

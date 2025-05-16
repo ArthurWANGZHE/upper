@@ -1,8 +1,8 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.uic.properties import QtCore
 
-from arm_controller import ArmController
-from communication import Communication
+from src.core.arm_controller import ArmController
+from src.communication.communication import Communication
 
 class WorkerThread(QThread):
     armcontroller = ArmController()
